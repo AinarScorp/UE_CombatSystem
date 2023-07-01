@@ -72,3 +72,7 @@ CombatSystem/Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 CombatSystem/DerivedDataCache/*
+
+CombatSystem/Plugins/Developer/RiderLink/*
+CombatSystem/.idea/*
+CombatSystem/*/.idea/*
