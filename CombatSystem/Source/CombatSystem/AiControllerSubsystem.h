@@ -23,6 +23,5 @@ public:
 	void AddToActiveEnemies(AActor* NewActiveEnemy) {ActiveEnemies.AddUnique(NewActiveEnemy);}
 	UFUNCTION(BlueprintCallable)
 	void RemoveActiveEnemies(AActor* ActiveEnemyToRemove) {ActiveEnemies.RemoveSingle(ActiveEnemyToRemove);}
-	
-	
+
 };
