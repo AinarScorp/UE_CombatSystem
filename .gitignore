@@ -76,3 +76,4 @@ CombatSystem/DerivedDataCache/*
 CombatSystem/Plugins/Developer/RiderLink/*
 CombatSystem/.idea/*
 CombatSystem/*/.idea/*
+CombatSystem/.vsconfig
