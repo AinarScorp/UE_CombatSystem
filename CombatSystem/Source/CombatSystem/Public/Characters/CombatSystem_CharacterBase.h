@@ -3,27 +3,31 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
+#include "Interfaces/CombatSystem_AbilityInterface.h"
 #include "CombatSystem_CharacterBase.generated.h"
 
+class UCombatSystem_CharacterStartupInfo;
+class UCombatAbility;
+
+
 UCLASS()
-class COMBATSYSTEM_API ACombatSystem_CharacterBase : public ACharacter
+class COMBATSYSTEM_API ACombatSystem_CharacterBase : public ACharacter, public ICombatSystem_AbilityInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ACombatSystem_CharacterBase();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual UCombatSystem_AbilityComponent* GetCombatAbilitySystemComponent() const override;
+	virtual void PossessedBy(AController* NewController) override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+private:
+	
+	UPROPERTY(EditAnywhere, Category = "CharacterBase|CombatSystem")
+	TObjectPtr<UCombatSystem_CharacterStartupInfo> StartupInfo;
+	UPROPERTY(VisibleAnywhere, Category = "CharacterBase|CombatSystem")
+	TObjectPtr<UCombatSystem_AbilityComponent> CombatSystemComponent;
 };

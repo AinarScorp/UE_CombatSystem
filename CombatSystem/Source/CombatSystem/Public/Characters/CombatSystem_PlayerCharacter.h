@@ -13,5 +13,5 @@ UCLASS()
 class COMBATSYSTEM_API ACombatSystem_PlayerCharacter : public ACombatSystem_CharacterBase
 {
 	GENERATED_BODY()
-	
+
 };

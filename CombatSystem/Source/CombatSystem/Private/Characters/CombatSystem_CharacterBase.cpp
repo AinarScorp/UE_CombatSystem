@@ -3,32 +3,36 @@
 
 #include "Characters/CombatSystem_CharacterBase.h"
 
+#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Data/CombatSystem_CharacterStartupInfo.h"
+
 // Sets default values
 ACombatSystem_CharacterBase::ACombatSystem_CharacterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	CombatSystemComponent = CreateDefaultSubobject<UCombatSystem_AbilityComponent>("CombatSystemComponent");
+}
+
+UCombatSystem_AbilityComponent* ACombatSystem_CharacterBase::GetCombatAbilitySystemComponent() const
+{
+	return CombatSystemComponent;
 
 }
 
-// Called when the game starts or when spawned
-void ACombatSystem_CharacterBase::BeginPlay()
+void ACombatSystem_CharacterBase::PossessedBy(AController* NewController)
 {
-	Super::BeginPlay();
+	Super::PossessedBy(NewController);
+	CombatSystemComponent->InitAbilityActorInfo(this,this);
 	
+	for (auto StartupAbility : StartupInfo.Get()->GetAbilityList())
+	{
+		FCombatAbilitySpec AbilitySpec = FCombatAbilitySpec(StartupAbility.Ability);
+		AbilitySpec.DynamicAbilityTags.AddTag(StartupAbility.DynamicTag);
+		CombatSystemComponent->GiveAbility(AbilitySpec);
+	}
+
+	if (!StartupInfo->GetAnimMontages().IsEmpty())
+	{
+		CombatSystemComponent->AddAnimMontages(StartupInfo->GetAnimMontages());
+	}
 }
-
-// Called every frame
-void ACombatSystem_CharacterBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void ACombatSystem_CharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-

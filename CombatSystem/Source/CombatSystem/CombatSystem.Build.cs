@@ -8,7 +8,7 @@ public class CombatSystem : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule","EnhancedInput", "GameplayTags"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
