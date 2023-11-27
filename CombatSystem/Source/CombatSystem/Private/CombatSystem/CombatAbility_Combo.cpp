@@ -9,58 +9,95 @@
 #include "Player/Controller/CombatSystem_PlayerController.h"
 #include "Tags/CombatSystem_GameplayTags.h"
 
-void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
+void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
-	Super::ActivateAbility(Handle, ActorInfo);
+	UE_LOG(LogTemp,Display, TEXT("%s ActivateAbility"),*GetName())
+
+	Super::ActivateAbility(Handle, ActorInfo,TriggerEventData);
 	CurrentComboIndex = 0;
+	ListeningToInput = false;
 	StartNextAttack();
 }
 
 void UCombatAbility_Combo::InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
 {
+	UE_LOG(LogTemp,Display, TEXT("%s InputPressed"),*GetName())
+
 	if (!ListeningToInput) return;
-	Super::InputPressed(Handle, ActorInfo);
-	const FCombatSystem_GameplayTags& GameplayTags = FCombatSystem_GameplayTags::Get();
-	
-	UCombatSystem_WaitGameplayEvent* WaitEvent = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(ActorInfo->AvatarActor.Get(),GameplayTags.AttackInputWindow_End,true);
-	WaitEvent->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowEnded);
-	WaitEvent->ReadyForActivation();
-	//CurrentActorInfo->CombatAbilitySystemComponent->AddTaskReadyForActivation(*WaitEvent);
+	UE_LOG(LogTemp,Display, TEXT("%s InputPressed and succeded"),*GetName())
 
 	ListeningToInput = false;
+	Super::InputPressed(Handle, ActorInfo);
+	StartNewWaitTaskForInputWindowEnd();
+
+}
+
+void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
+{
+	if (WaitForInputWindowStartTask.IsValid())
+	{
+		WaitForInputWindowStartTask->EndTask();
+	}
+	if (WaitForInputWindowEndTask.IsValid())
+	{
+		WaitForInputWindowEndTask->EndTask();
+	}
+	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
 }
 
 void UCombatAbility_Combo::StartNextAttack()
 {
 	if (Combos.Num()<= CurrentComboIndex) return;
-
+	UE_LOG(LogTemp,Display, TEXT("%s StartNextAttack :BEGIN"),*GetName())
 	const FComboAnimInfo& ComboInfo = Combos[CurrentComboIndex];
 	CurrentComboIndex++;
 	RotateToMoveInput();
-	//UPlayMontageCallbackProxy* MontageTask = UPlayMontageCallbackProxy::CreateProxyObjectForPlayMontage(CurrentActorInfo->SkeletalMeshComponent.Get(),ComboInfo.AnimMontage,1,0,ComboInfo.AnimSection);
 	UCombatSystem_PlayMontage* MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
 	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::MontageStoppedPlaying);
-	//CurrentActorInfo->CombatAbilitySystemComponent->AddTaskReadyForActivation(*MontageTask);
 	MontageTask->ReadyForActivation();
-	const FCombatSystem_GameplayTags& GameplayTags = FCombatSystem_GameplayTags::Get();
-	UCombatSystem_WaitGameplayEvent* WaitTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),GameplayTags.AttackInputWindow_Start,true);
-	WaitTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowStarted);
-	WaitTask->ReadyForActivation();
-	//CurrentActorInfo->CombatAbilitySystemComponent->AddTaskReadyForActivation(*WaitTask);
+	
+	StartNewWaitTaskForInputWindowStart();
+}
+void UCombatAbility_Combo::StartNewWaitTaskForInputWindowStart()
+{
+	if (WaitForInputWindowStartTask.IsValid())
+	{
+		WaitForInputWindowStartTask->EndTask();
+	}
+	WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),FCombatSystem_GameplayTags::Get().AttackInputWindow_Start,true);
+	WaitForInputWindowStartTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowStarted);
+	WaitForInputWindowStartTask->ReadyForActivation();
 }
 
+void UCombatAbility_Combo::StartNewWaitTaskForInputWindowEnd()
+{
+	if (WaitForInputWindowEndTask.IsValid())
+	{
+		WaitForInputWindowStartTask->EndTask();
+	}
+	WaitForInputWindowEndTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(), FCombatSystem_GameplayTags::Get().AttackInputWindow_End,true);
+	WaitForInputWindowEndTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowEnded);
+	WaitForInputWindowEndTask->ReadyForActivation();
+}
 void UCombatAbility_Combo::MontageStoppedPlaying()
 {
+	UE_LOG(LogTemp,Display, TEXT("%s MontageStoppedPlaying"),*GetName())
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, false);
+	
 }
 
 void UCombatAbility_Combo::AttackInputWindowStarted(FCombatEventData Payload)
 {
+	UE_LOG(LogTemp,Display, TEXT("%s AttackInputWindowStarted"),*GetName())
+
 	ListeningToInput = true;
 }
 
 void UCombatAbility_Combo::AttackInputWindowEnded(FCombatEventData Payload)
 {
+	UE_LOG(LogTemp,Display, TEXT("%s AttackInputWindowEnded"),*GetName())
+
 	StartNextAttack();
 }
 
@@ -77,5 +114,6 @@ void UCombatAbility_Combo::RotateToMoveInput() const
 	
 	CurrentActorInfo->AvatarActor->SetActorRotation(UKismetMathLibrary::ComposeRotators(RotFromMoveInput, RotFromCurrentRotation));
 }
+
 
 

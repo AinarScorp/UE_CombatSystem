@@ -3,24 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTask.h"
+#include "CombatSystem_AttackTrace.h"
+#include "Helpers/HelperStructs.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "CombatSystem_AttackSphereTrace.generated.h"
 
+class UCombatSystem_AbilityComponent;
+class USkeletalMeshComponent;
 /**
  * 
  */
 UCLASS()
-class COMBATSYSTEM_API UCombatSystem_AttackSphereTrace : public UGameplayTask
+class COMBATSYSTEM_API UCombatSystem_AttackSphereTrace : public UCombatSystem_AttackTrace
 {
 	GENERATED_BODY()
 public:
-	UCombatSystem_AttackSphereTrace(const FObjectInitializer& ObjectInitializer);
 	
 	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability", meta = (DefaultToSelf = "OwningActor"))
-	static UCombatSystem_AttackSphereTrace* AttackSphereTrace(AActor* OwningActor);
+	static UCombatSystem_AttackSphereTrace* AttackSphereTrace(AActor* OwningActor, USkeletalMeshComponent* SkeletalMeshComponent,FName WeaponCenterSocketName,float Radius, ETraceTypeQuery TraceChannel, TArray<AActor*> InActorsToIgnore);
 	virtual void TickTask(float DeltaTime) override;
-	virtual void Activate() override;
-public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHitActor, AActor*, HitActor, FHitResult, HitResult);
+
+private:
+	float Radius;
+
 
 };

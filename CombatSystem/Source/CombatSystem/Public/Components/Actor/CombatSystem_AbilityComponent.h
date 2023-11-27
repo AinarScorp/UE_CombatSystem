@@ -31,6 +31,8 @@ class COMBATSYSTEM_API UCombatSystem_AbilityComponent : public UGameplayTasksCom
 {
 	GENERATED_BODY()
 public:
+	FORCEINLINE FGameplayTagContainer GetContainedAbilityTags() const {return ContainedTags;};
+	
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor);
 	virtual void OnRegister() override;
 	
@@ -47,28 +49,26 @@ public:
 	bool TryActivateAbilitiesByTag(const FGameplayTagContainer& GameplayTagContainer, bool bAllowRemoteActivation = true);
 	bool TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload, UCombatSystem_AbilityComponent& Component);
 
-	bool InternalTryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, UCombatAbility ** OutInstancedAbility = nullptr, const FCombatEventData* TriggerEventData = nullptr);
+	bool InternalTryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, const FCombatEventData* TriggerEventData = nullptr);
 	
 	FCombatAbilitySpecHandle GiveAbility(const FCombatAbilitySpec& AbilitySpec);
 	void CancelAbilities(const FGameplayTagContainer* WithTags=nullptr, const FGameplayTagContainer* WithoutTags=nullptr, UCombatAbility* Ignore=nullptr);
 	virtual void CancelAbilitySpec(FCombatAbilitySpec& Spec, UCombatAbility* Ignore);
 	virtual void ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UCombatAbility* RequestingAbility, bool bEnableBlockTags, const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags);
-
+	void ApplyAbilityContainedTags(const FGameplayTagContainer& AbilityTags, bool bRemove);
 	virtual int32 HandleGameplayEvent(FGameplayTag EventTag, const FCombatEventData* Payload);
 
 	FCombatAbilitySpec* FindAbilitySpecFromHandle(FCombatAbilitySpecHandle Handle);
 	void GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities, bool bOnlyAbilitiesThatSatisfyTagRequirements = true) const;
 	virtual bool AreAbilityTagsBlocked(const FGameplayTagContainer& Tags) const;
+	virtual bool ContainsAbilityTags(const FGameplayTagContainer& Tags) const;
 
-	void AddAnimMontages(const TMap<FGameplayTag, TObjectPtr<UAnimMontage>>& NewMontages);
 	virtual float PlayMontage(UCombatAbility* AnimatingAbility, UAnimMontage* NewAnimMontage, float InPlayRate, FName StartSectionName = NAME_None, float StartTimeSeconds = 0.0f);
-	UAnimMontage* GetAnimMontageByTag(FGameplayTag ByTag);
 private:
 	void RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec);
 public:
 	TSharedPtr<FCombatAbilityActorInfo>	CombatAbilityActorInfo;
 	TMap<FGameplayTag, FGameplayEventMulticastDelegate> GenericGameplayEventCallbacks;
-	FGameplayTagContainer BlockedTags;
 protected:
 	TMap<FGameplayTag, TArray<FCombatAbilitySpecHandle>> GameplayEventTriggeredAbilities;
 	UPROPERTY(BlueprintReadOnly,VisibleAnywhere, Category = "CombatSystem|Abilities")
@@ -80,10 +80,12 @@ protected:
 	TArray<FCombatAbilitySpecHandle> InputReleasedSpecHandles;
 	// Handles to abilities that have their input held.
 	TArray<FCombatAbilitySpecHandle> InputHeldSpecHandles;
-	
-	UPROPERTY(VisibleAnywhere, Category = "Animations With Tag")
-	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> AnimMontagesByTag;
+
 private:
+	UPROPERTY(VisibleAnywhere)
+	FGameplayTagContainer BlockedTags;
+	UPROPERTY(VisibleAnywhere)
+	FGameplayTagContainer ContainedTags;
 	
 
 

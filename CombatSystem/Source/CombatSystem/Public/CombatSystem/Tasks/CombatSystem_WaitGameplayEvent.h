@@ -12,6 +12,7 @@ class UCombatSystem_AbilityComponent;
 /**
  * 
  */
+//TODO: Should I end action if I finished it prematurely, look into Lyra
 UCLASS()
 class COMBATSYSTEM_API UCombatSystem_WaitGameplayEvent : public UGameplayTask
 {
@@ -27,6 +28,7 @@ public:
 protected:
 	virtual void Activate() override;
 	virtual void EndAction();
+	virtual void OnDestroy(bool bInOwnerFinished) override;
 
 	virtual void GameplayEventCallback(const FCombatEventData* Payload);
 	virtual void GameplayEventContainerCallback(FGameplayTag MatchingTag, const FCombatEventData* Payload);

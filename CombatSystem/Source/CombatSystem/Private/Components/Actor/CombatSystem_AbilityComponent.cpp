@@ -7,6 +7,7 @@
 #include "CombatSystem/CombatAbility.h"
 #include "CombatSystem/InputAbility.h"
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
+#include "Interfaces/CombatSystem_AbilityInterface.h"
 
 void UCombatSystem_AbilityComponent::OnRegister()
 {
@@ -140,10 +141,6 @@ void UCombatSystem_AbilityComponent::InitAbilityActorInfo(AActor* InOwnerActor, 
 	CombatAbilityActorInfo->InitFromActor(InOwnerActor, InAvatarActor, this);
 }
 
-void UCombatSystem_AbilityComponent::AddAnimMontages(const TMap<FGameplayTag, TObjectPtr<UAnimMontage>>& NewMontages)
-{
-	AnimMontagesByTag.Append(NewMontages);
-}
 
 float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbility, UAnimMontage* NewAnimMontage, float InPlayRate, FName StartSectionName, float StartTimeSeconds)
 {
@@ -171,10 +168,7 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 	return Duration;
 }
 
-UAnimMontage* UCombatSystem_AbilityComponent::GetAnimMontageByTag(FGameplayTag ByTag)
-{
-	return AnimMontagesByTag.Find(ByTag)->Get();
-}
+
 
 void UCombatSystem_AbilityComponent::RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec)
 {
@@ -198,9 +192,9 @@ void UCombatSystem_AbilityComponent::RegisterTriggerableAbilities(const FCombatA
 	}
 }
 
-void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UCombatAbility* RequestingAbility, bool bEnableBlockTags,
-                                                                    const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags)
+void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UCombatAbility* RequestingAbility, bool bEnableBlockTags,const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags)
 {
+	//TODO: Check what happens if one thing removes tags, but there should be another one with the same
 	if (bEnableBlockTags)
 	{
 		BlockedTags.AppendTags(BlockTags);
@@ -213,6 +207,19 @@ void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGamep
 	if (bExecuteCancelTags)
 	{
 		CancelAbilities(&CancelTags, nullptr, RequestingAbility);
+	}
+}
+
+void UCombatSystem_AbilityComponent::ApplyAbilityContainedTags(const FGameplayTagContainer& AbilityTags, bool bRemove)
+{
+	//TODO: Check what happens if one thing removes tags, but there should be another one with the same
+	if (bRemove)
+	{
+		ContainedTags.RemoveTags(AbilityTags);
+	}
+	else
+	{
+		ContainedTags.AppendTags(AbilityTags);
 	}
 }
 
@@ -280,6 +287,11 @@ bool UCombatSystem_AbilityComponent::AreAbilityTagsBlocked(const FGameplayTagCon
 	return BlockedTags.HasAny(Tags);
 }
 
+bool UCombatSystem_AbilityComponent::ContainsAbilityTags(const FGameplayTagContainer& Tags) const
+{
+	return ContainedTags.HasAny(Tags);
+}
+
 bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
 {
 	FCombatAbilitySpec* Spec = FindAbilitySpecFromHandle(AbilityToActivate);
@@ -324,11 +336,11 @@ bool UCombatSystem_AbilityComponent::TriggerAbilityFromGameplayEvent(FCombatAbil
 	FCombatEventData TempEventData = *Payload;
 	TempEventData.EventTag = Tag;
 
-	return InternalTryActivateAbility(AbilityToTrigger, nullptr, &TempEventData);
+	return InternalTryActivateAbility(AbilityToTrigger, &TempEventData);
 }
 
 
-bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySpecHandle Handle, UCombatAbility** OutInstancedAbility, const FCombatEventData* TriggerEventData)
+bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySpecHandle Handle, const FCombatEventData* TriggerEventData)
 {
 	if (Handle.IsValid() == false)
 	{
@@ -353,15 +365,26 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 	{
 		return false;
 	}
-
-	if (!Ability->CanActivateAbility(Handle, ActorInfo))
+	const FGameplayTagContainer* SourceTags = &ContainedTags;
+	const FGameplayTagContainer* TargetTags = nullptr;
+	if (TriggerEventData != nullptr && TriggerEventData->Target)
+	{
+		const ICombatSystem_AbilityInterface* TargetAbilityInterface = Cast<ICombatSystem_AbilityInterface>(TriggerEventData->Target);
+		if (TargetAbilityInterface && TargetAbilityInterface->GetCombatAbilitySystemComponent())
+		{
+			const FGameplayTagContainer TargetContainedTags = TargetAbilityInterface->GetCombatAbilitySystemComponent()->GetContainedAbilityTags();
+			TargetTags = &TargetContainedTags;
+		}
+	}
+	
+	if (!Ability->CanActivateAbility(Handle, ActorInfo,SourceTags,TargetTags))
 	{
 		//NotifyAbilityFailed(Handle, CanActivateAbilitySource, InternalTryActivateAbilityFailureTags);
 		return false;
 	}
 
 	//Ability->CallActivateAbility(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
-	Ability->ActivateAbility(Handle, ActorInfo);
+	Ability->ActivateAbility(Handle, ActorInfo,TriggerEventData);
 	return true;
 }
 

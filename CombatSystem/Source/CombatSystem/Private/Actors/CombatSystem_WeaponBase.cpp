@@ -14,4 +14,9 @@ ACombatSystem_WeaponBase::ACombatSystem_WeaponBase()
 	SetRootComponent(WeaponMesh);
 }
 
+USkeletalMeshComponent* ACombatSystem_WeaponBase::GetWeaponMesh() const
+{
+	return WeaponMesh;
+}
+
 

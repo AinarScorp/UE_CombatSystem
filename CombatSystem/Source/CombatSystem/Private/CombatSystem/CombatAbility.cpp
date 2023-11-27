@@ -9,7 +9,7 @@
 
 
 
-bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo) const
+bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
 {
 
 	AActor* const AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
@@ -28,7 +28,7 @@ bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, c
 	{
 		return false;
 	}
-	if (!DoesAbilitySatisfyTagRequirements(*AbilitySystemComponent))
+	if (!DoesAbilitySatisfyTagRequirements(*AbilitySystemComponent,SourceTags, TargetTags))
 	{
 		return false;
 	}
@@ -37,16 +37,11 @@ bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, c
 	return true;
 }
 
-bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystem_AbilityComponent& CombatAbilitySystemComponent) const
+bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystem_AbilityComponent& CombatAbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
 {
-	bool bBlocked = false;
-	bool bMissing = false;
-
-
 	// Check if any of this ability's tags are currently blocked
 	if (CombatAbilitySystemComponent.AreAbilityTagsBlocked(AbilityTags))
 	{
-		bBlocked = true;
 		return false;
 	}
 
@@ -68,9 +63,40 @@ bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystem_Abili
 	// 		bMissing = true;
 	// 	}
 	// }
+	if (SourceTags != nullptr)
+	{
+		//if (SourceBlockedTags.Num() || SourceRequiredTags.Num())
+		if (SourceBlockedTags.Num())
+		{
+			if (SourceTags->HasAny(SourceBlockedTags))
+			{
+				return false;
+			}
 
+			// if (!SourceTags->HasAll(SourceRequiredTags))
+			// {
+			// 	return false;
+			// 	bMissing = true;
+			// }
+		}
+	}
 
-
+	if (TargetTags != nullptr)
+	{
+		//if (TargetBlockedTags.Num() || TargetRequiredTags.Num())
+		if (TargetBlockedTags.Num())
+		{
+			if (TargetTags->HasAny(TargetBlockedTags))
+			{
+				return false;
+			}
+			//
+			// if (!TargetTags->HasAll(TargetRequiredTags))
+			// {
+			// 	return false;
+			// }
+		}
+	}
 	
 	return true;
 }
@@ -121,13 +147,17 @@ bool UCombatAbility::CheckCost(const FCombatAbilitySpecHandle Handle, const FCom
 	return true;
 }
 
-void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
+void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
+	if (TriggerEventData)
+	{
+		CombatEventData = *TriggerEventData;
+	}
 	UCombatSystem_AbilityComponent* Comp = ActorInfo->CombatAbilitySystemComponent.Get();
 	FCombatAbilitySpec* Spec = Comp->FindAbilitySpecFromHandle(Handle);
 
 	Comp->ApplyAbilityBlockAndCancelTags(AbilityTags, this, true, BlockAbilitiesWithTag, true, CancelAbilitiesWithTag);
-
+	Comp->ApplyAbilityContainedTags(OnGiveAbilityGrandTags, false);
 	Spec->ActiveCount++;
 	bIsActive = true;
 	BP_ActivateAbility();
@@ -135,11 +165,10 @@ void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, cons
 
 void UCombatAbility::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
 {
-	UE_LOG(LogTemp,Display,TEXT("EndAbility %s"), *GetName())
-
 	UCombatSystem_AbilityComponent* Comp = ActorInfo->CombatAbilitySystemComponent.Get();
 	FCombatAbilitySpec* Spec = Comp->FindAbilitySpecFromHandle(Handle);
 	Comp->ApplyAbilityBlockAndCancelTags(AbilityTags, this, false, BlockAbilitiesWithTag, false, CancelAbilitiesWithTag);
+	Comp->ApplyAbilityContainedTags(OnGiveAbilityGrandTags, true);
 
 	Spec->ActiveCount--;
 	bIsActive = false;

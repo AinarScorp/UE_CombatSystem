@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 
+class UGameplayTagsManager;
+
 /**
  * 
  */
@@ -22,8 +24,10 @@ public:
 	FGameplayTag InputTag_Look;
 	FGameplayTag AttackInputWindow_Start;
 	FGameplayTag AttackInputWindow_End;
+	FGameplayTag Weapon;
 	FGameplayTag Weapon_StartExecute;
 	FGameplayTag Weapon_FinishExecute;
+	FGameplayTag Hit;
 
 private:
 	static FCombatSystem_GameplayTags GameplayTags;

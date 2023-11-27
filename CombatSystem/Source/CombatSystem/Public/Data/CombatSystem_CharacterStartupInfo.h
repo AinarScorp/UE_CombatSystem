@@ -29,12 +29,9 @@ class COMBATSYSTEM_API UCombatSystem_CharacterStartupInfo : public UDataAsset
 	GENERATED_BODY()
 public:
 	TArray<FTagAbility> GetAbilityList(){return Abilities;};
-	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> GetAnimMontages() {return AnimMontagesByTag;};
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Abilities")
 	TArray<FTagAbility> Abilities;
-	UPROPERTY(EditDefaultsOnly, Category = "Animations With Tag")
-	TMap<FGameplayTag, TObjectPtr<UAnimMontage>> AnimMontagesByTag;
 
 };

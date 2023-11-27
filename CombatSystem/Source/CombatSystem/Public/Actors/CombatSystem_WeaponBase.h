@@ -15,6 +15,7 @@ class COMBATSYSTEM_API ACombatSystem_WeaponBase : public AActor
 	
 public:	
 	ACombatSystem_WeaponBase();
+	USkeletalMeshComponent* GetWeaponMesh() const;
 private:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "WeaponBase", meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent_Weapon* WeaponMesh;

@@ -8,28 +8,27 @@
 
 
 
-UCombatSystem_AttackSphereTrace::UCombatSystem_AttackSphereTrace(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UCombatSystem_AttackSphereTrace* UCombatSystem_AttackSphereTrace::AttackSphereTrace(AActor* OwningActor, USkeletalMeshComponent* SkeletalMeshComponent, const FName WeaponCenterSocketName, const float Radius, const ETraceTypeQuery TraceChannel, const TArray<AActor*> InActorsToIgnore)
 {
-	bTickingTask =true;
-
-}
-
-UCombatSystem_AttackSphereTrace* UCombatSystem_AttackSphereTrace::AttackSphereTrace(AActor* OwningActor)
-{
-	return nullptr;
+	UCombatSystem_AttackSphereTrace* MyObj = NewTask<UCombatSystem_AttackSphereTrace>(OwningActor, "AttackSphereTrace");
+	MyObj->OwningActor = OwningActor;
+	MyObj->SkeletalMesh = SkeletalMeshComponent;
+	MyObj->WeaponCenterSocketName = WeaponCenterSocketName;
+	MyObj->Radius = Radius;
+	MyObj->TraceChannel = TraceChannel;
+	MyObj->ActorsToIgnore = InActorsToIgnore;
+	return MyObj;
 }
 
 void UCombatSystem_AttackSphereTrace::TickTask(float DeltaTime)
 {
-	// USkeletalMeshComponent* SkeletalMeshComponent;
-	// FVector Start = SkeletalMeshComponent->GetSocketLocation("StartSocket");
-	// FVector End = SkeletalMeshComponent->GetSocketLocation("EndSocket");
-	// float Radius = 2;
-	// ETraceTypeQuery TypeQuery;
-	// UKismetSystemLibrary::SphereTraceMulti(nullptr,Start,End,Radius,TypeQuery, false, )
-}
-
-void UCombatSystem_AttackSphereTrace::Activate()
-{
-	Super::Activate();
+	EndTraceLocation = SkeletalMesh.Get()->GetSocketLocation(WeaponCenterSocketName);
+	TArray<FHitResult> HitResults;
+	UKismetSystemLibrary::SphereTraceMulti(OwningActor.Get(),StartTraceLocation,EndTraceLocation,Radius,TraceChannel, false, ActorsToIgnore,DebugInfo.DrawDebugTraceType,HitResults, true, DebugInfo.TraceColor,DebugInfo.TraceHitColor,DebugInfo.DrawTime);
+	for (auto HitResult : HitResults)
+	{
+		ActorsToIgnore.Add(HitResult.GetActor());
+		OnHitTarget.Broadcast(OwningActor.Get(), HitResult);
+	}
+	StartTraceLocation = EndTraceLocation;
 }

@@ -26,4 +26,7 @@ struct FCombatEventData
 	/** The target of the event */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<const AActor> Target;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FHitResult HitResult;
 };

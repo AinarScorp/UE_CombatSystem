@@ -30,9 +30,4 @@ void ACombatSystem_CharacterBase::PossessedBy(AController* NewController)
 		AbilitySpec.DynamicAbilityTags.AddTag(StartupAbility.DynamicTag);
 		CombatSystemComponent->GiveAbility(AbilitySpec);
 	}
-
-	if (!StartupInfo->GetAnimMontages().IsEmpty())
-	{
-		CombatSystemComponent->AddAnimMontages(StartupInfo->GetAnimMontages());
-	}
 }

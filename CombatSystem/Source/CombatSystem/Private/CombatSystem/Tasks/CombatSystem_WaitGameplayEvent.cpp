@@ -24,7 +24,6 @@ UCombatSystem_WaitGameplayEvent* UCombatSystem_WaitGameplayEvent::WaitGameplayEv
 
 void UCombatSystem_WaitGameplayEvent::Activate()
 {
-	Super::Activate();
 	UCombatSystem_AbilityComponent* CSC = CombatSystemComponent.Get();
 	if (CSC)
 	{
@@ -37,10 +36,7 @@ void UCombatSystem_WaitGameplayEvent::Activate()
 			//MyHandle = CSC->AddGameplayEventTagContainerDelegate(FGameplayTagContainer(Tag), FGameplayEventTagMulticastDelegate::FDelegate::CreateUObject(this, &UAbilityAsync_WaitGameplayEvent::GameplayEventContainerCallback));
 		}
 	}
-	else
-	{
-		EndAction();
-	}
+	Super::Activate();
 }
 
 void UCombatSystem_WaitGameplayEvent::EndAction()
@@ -60,8 +56,17 @@ void UCombatSystem_WaitGameplayEvent::EndAction()
 	}
 }
 
+void UCombatSystem_WaitGameplayEvent::OnDestroy(bool bInOwnerFinished)
+{
+	EndAction();
+	Super::OnDestroy(bInOwnerFinished);
+}
+
+
 void UCombatSystem_WaitGameplayEvent::GameplayEventCallback(const FCombatEventData* Payload)
 {
+	UE_LOG(LogTemp,Display, TEXT("%s GameplayEventCallback %s"),*GetName(), *Tag.GetTagName().ToString())
+
 	GameplayEventContainerCallback(Tag, Payload);
 
 }
@@ -74,13 +79,10 @@ void UCombatSystem_WaitGameplayEvent::GameplayEventContainerCallback(FGameplayTa
 		TempPayload.EventTag = MatchingTag;
 		EventReceived.Broadcast(MoveTemp(TempPayload));
 		
-		if (OnlyTriggerOnce)
-		{
-			EndAction();
-		}
 	}
-	else
+	if (OnlyTriggerOnce)
 	{
-		EndAction();
+		EndTask();
 	}
+
 }

@@ -20,8 +20,7 @@ void UCombatSystem_PlayMontage::OnMontageEnded(UAnimMontage* Montage, bool bInte
 	EndTask();
 }
 
-UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCombatAbility* OwningAbility, FName TaskInstanceName, UAnimMontage* MontageToPlay, float Rate, FName StartSection,
-                                                                             bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds)
+UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCombatAbility* OwningAbility, FName TaskInstanceName, UAnimMontage* MontageToPlay, float Rate, FName StartSection,bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds)
 {
 	UCombatSystem_PlayMontage* MyObj = NewTask<UCombatSystem_PlayMontage>(*OwningAbility->GetCurrentActorInfo()->AvatarActor, TaskInstanceName);
 	MyObj->Ability = OwningAbility;
