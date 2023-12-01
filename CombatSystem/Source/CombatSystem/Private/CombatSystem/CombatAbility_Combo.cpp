@@ -36,11 +36,15 @@ void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, con
 {
 	if (WaitForInputWindowStartTask.IsValid())
 	{
-		WaitForInputWindowStartTask->EndTask();
+		WaitForInputWindowStartTask->ExternalCancel();
 	}
 	if (WaitForInputWindowEndTask.IsValid())
 	{
-		WaitForInputWindowEndTask->EndTask();
+		WaitForInputWindowEndTask->ExternalCancel();
+	}
+	if (MontageTask.IsValid())
+	{
+		MontageTask->ExternalCancel();
 	}
 	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
 }
@@ -52,7 +56,7 @@ void UCombatAbility_Combo::StartNextAttack()
 	const FComboAnimInfo& ComboInfo = Combos[CurrentComboIndex];
 	CurrentComboIndex++;
 	RotateToMoveInput();
-	UCombatSystem_PlayMontage* MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
+	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
 	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::MontageStoppedPlaying);
 	MontageTask->ReadyForActivation();
 	
@@ -62,7 +66,7 @@ void UCombatAbility_Combo::StartNewWaitTaskForInputWindowStart()
 {
 	if (WaitForInputWindowStartTask.IsValid())
 	{
-		WaitForInputWindowStartTask->EndTask();
+		WaitForInputWindowStartTask->ExternalCancel();
 	}
 	WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),FCombatSystem_GameplayTags::Get().AttackInputWindow_Start,true);
 	WaitForInputWindowStartTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowStarted);

@@ -22,7 +22,6 @@ void UCombatSystem_AttackBoxTrace::TickTask(float DeltaTime)
 {
 	EndTraceLocation = SkeletalMesh.Get()->GetSocketLocation(WeaponCenterSocketName);
 	TArray<FHitResult> HitResults;
-	
 	UKismetSystemLibrary::BoxTraceMulti(OwningActor.Get(),StartTraceLocation,EndTraceLocation,HalfSize,SkeletalMesh->GetComponentRotation() + RotationOffset,TraceChannel, false, ActorsToIgnore,DebugInfo.DrawDebugTraceType,HitResults, true, DebugInfo.TraceColor,DebugInfo.TraceHitColor,DebugInfo.DrawTime);
 	for (auto HitResult : HitResults)
 	{

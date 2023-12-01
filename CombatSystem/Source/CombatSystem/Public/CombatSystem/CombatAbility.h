@@ -40,7 +40,7 @@ struct FCombatAbilityTriggerData
 	UPROPERTY(EditAnywhere, Category=TriggerData)
 	TEnumAsByte<ECombatAbilityTriggerSource> TriggerSource;
 };
-
+DECLARE_MULTICAST_DELEGATE(FOnCombatAbilityCancelled);
 /**
  * 
  */
@@ -50,7 +50,8 @@ class COMBATSYSTEM_API UCombatAbility : public UObject
 {
 	GENERATED_BODY()
 	friend class UCombatSystem_AbilityComponent;
-
+public:
+	UCombatAbility(const FObjectInitializer& ObjectInitializer);
 public:
 	/** Returns true if this ability can be activated right now. Has no side effects */
 	virtual bool CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr) const;
@@ -73,6 +74,10 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "ActivateAbility")
 	void BP_ActivateAbility();
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "CanActivateAbility")
+	bool BP_CanActivateAbility(FCombatAbilityActorInfo ActorInfo) const;
+	bool bHasBlueprintCanUse;
+	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnEndAbility")
 	void BP_OnEndAbility(bool bWasCancelled);
 	UFUNCTION(BlueprintCallable, DisplayName = "EndAbility")
@@ -88,10 +93,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
 	FCombatEventData GetCombatEventData() const { return CombatEventData; };
 	const FCombatAbilityActorInfo* GetCurrentActorInfo() const { return CurrentActorInfo; };
+	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability")
+	FGameplayTagContainer GetAbilityTags() const { return AbilityTags; };
 protected:
+	UFUNCTION()
 	virtual void InternalEndAbility();
 
 public:
+	FOnCombatAbilityCancelled OnCombatAbilityCancelled;
+
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer AbilityTags;
 	UPROPERTY(EditDefaultsOnly, Category = Tags, meta=(Categories="AbilityTagCategory"))
@@ -109,6 +120,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Tags)
 	FGameplayTagContainer OnGiveAbilityGrandTags;
 
+	
 
 protected:
 	mutable const FCombatAbilityActorInfo* CurrentActorInfo;
@@ -117,9 +129,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = Triggers)
 	TArray<FCombatAbilityTriggerData> AbilityTriggers;
-
-	UPROPERTY()
-	bool bIsCancelable;
+	UPROPERTY(EditDefaultsOnly, Category = Advanced)
+	bool bRetriggerInstancedAbility;
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsCancelable = true;
 	UPROPERTY()
 	bool bIsActive;
 };

@@ -19,7 +19,6 @@ class COMBATSYSTEM_API ACombatSystem_CharacterBase : public ACharacter, public I
 
 public:
 	ACombatSystem_CharacterBase();
-
 	virtual UCombatSystem_AbilityComponent* GetCombatAbilitySystemComponent() const override;
 	virtual void PossessedBy(AController* NewController) override;
 

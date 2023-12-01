@@ -8,7 +8,7 @@
 
 void UCombatAbility_Hit::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
-	if (!TriggerEventData)
+	if (!TriggerEventData || !TriggerEventData->Target)
 	{
 		EndAbility(Handle,ActorInfo,true);
 	}
@@ -22,7 +22,7 @@ void UCombatAbility_Hit::ActivateAbility(const FCombatAbilitySpecHandle Handle, 
 
 FHitMontageWithSection UCombatAbility_Hit::GetSectionNameFromContext(const FCombatEventData* TriggerEventData) const
 {
-	switch (UEinarGameplayLibrary::GetActorRelativeContext(TriggerEventData->Target,TriggerEventData->HitResult.ImpactPoint))
+	switch (UEinarGameplayLibrary::GetActorRelativeContextSingle(TriggerEventData->Target,TriggerEventData->HitResult.ImpactPoint))
 	{
 	case ERelativeContext::Behind:
 		return HitFromBehindMontage;

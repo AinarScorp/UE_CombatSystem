@@ -10,7 +10,7 @@
 
 class UCombatAbility;
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FTagAbility
 {
 	GENERATED_BODY()

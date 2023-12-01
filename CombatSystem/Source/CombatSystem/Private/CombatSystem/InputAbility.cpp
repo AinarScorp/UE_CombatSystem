@@ -3,9 +3,6 @@
 
 #include "CombatSystem/InputAbility.h"
 
-UInputAbility::UInputAbility()
-{
-}
 
 void UInputAbility::SetInputActionValue(const FInputActionValue& NewInputActionValue) const
 {

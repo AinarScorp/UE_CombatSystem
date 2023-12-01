@@ -8,10 +8,20 @@
 #include "Components/Actor/CombatSystem_AbilityComponent.h"
 
 
+UCombatAbility::UCombatAbility(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
+{
+	auto ImplementedInBlueprint = [](const UFunction* Func) -> bool
+	{
+		return Func && ensure(Func->GetOuter())
+			&& Func->GetOuter()->IsA(UBlueprintGeneratedClass::StaticClass());
+	};
+	static FName FuncName = FName(TEXT("BP_CanActivateAbility"));
+	UFunction* CanActivateFunction = GetClass()->FindFunctionByName(FuncName);
+	bHasBlueprintCanUse = ImplementedInBlueprint(CanActivateFunction);
+}
 
 bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
 {
-
 	AActor* const AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
 	if (AvatarActor == nullptr)
 	{
@@ -28,12 +38,16 @@ bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, c
 	{
 		return false;
 	}
-	if (!DoesAbilitySatisfyTagRequirements(*AbilitySystemComponent,SourceTags, TargetTags))
+	if (!DoesAbilitySatisfyTagRequirements(*AbilitySystemComponent, SourceTags, TargetTags))
 	{
 		return false;
 	}
 
-
+	if (bHasBlueprintCanUse)
+	{
+		UE_LOG(LogTemp,Display, TEXT("%s I am in blueprints"), *GetName())
+		return BP_CanActivateAbility(*ActorInfo);
+	}
 	return true;
 }
 
@@ -97,7 +111,7 @@ bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystem_Abili
 			// }
 		}
 	}
-	
+
 	return true;
 }
 
@@ -172,12 +186,16 @@ void UCombatAbility::EndAbility(const FCombatAbilitySpecHandle Handle, const FCo
 
 	Spec->ActiveCount--;
 	bIsActive = false;
-
+	Comp->NotifyAbilityEnded(Handle, this, bWasCancelled);
 	BP_OnEndAbility(bWasCancelled);
 }
 
 void UCombatAbility::CancelAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
 {
+	if (OnCombatAbilityCancelled.IsBound())
+	{
+		OnCombatAbilityCancelled.Broadcast();
+	}
 	if (bIsCancelable)
 	{
 		EndAbility(Handle, ActorInfo, true);
@@ -197,13 +215,12 @@ void UCombatAbility::BP_EndAbility()
 
 void UCombatAbility::InternalEndAbility()
 {
-	EndAbility(CurrentSpecHandle,CurrentActorInfo, false);
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, false);
 }
 
 void UCombatAbility::InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
 {
 	BP_OnInputPressed();
-
 }
 
 void UCombatAbility::InputReleased(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)

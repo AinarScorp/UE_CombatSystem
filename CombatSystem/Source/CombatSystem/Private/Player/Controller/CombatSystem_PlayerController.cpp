@@ -64,12 +64,15 @@ void ACombatSystem_PlayerController::MoveInputTriggered(const FInputActionValue&
 void ACombatSystem_PlayerController::MoveInputFinished(const FInputActionValue& InputActionValue)
 {
 	MoveInput = {0,0};
+	
 }
 
 void ACombatSystem_PlayerController::LookInputTriggered(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 
+		// AddYawInput(InputAxisVector.X);
+		// AddPitchInput(InputAxisVector.Y);
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
 		ControlledPawn->AddControllerYawInput(InputAxisVector.X);

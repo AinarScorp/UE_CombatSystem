@@ -6,6 +6,8 @@
 #include "CombatAbility.h"
 #include "CombatAbility_Combo.generated.h"
 
+class UCombatSystem_PlayMontage;
+
 USTRUCT(BlueprintType)
 struct FComboAnimInfo
 {
@@ -47,6 +49,7 @@ protected:
 private:
 	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForInputWindowStartTask;
 	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForInputWindowEndTask;
+	TWeakObjectPtr<UCombatSystem_PlayMontage> MontageTask;
 	int CurrentComboIndex = 0;
 	bool ListeningToInput;
 	

@@ -48,7 +48,7 @@ void UCombatAbility_MeleeWeapon::OnHitTarget(AActor* ThisActor, FHitResult HitRe
 	EventData.Target = HitResult.GetActor();
 	EventData.EventTag  = FCombatSystem_GameplayTags::Get().Weapon;
 	EventData.HitResult = HitResult;
-	UCombatSystem_AbilityLibrary::SendGameplayEventToActor(HitResult.GetActor(),FCombatSystem_GameplayTags::Get().Hit, EventData);
+	UCombatSystem_AbilityLibrary::SendGameplayEventToActor(HitResult.GetActor(),FCombatSystem_GameplayTags::Get().Hit_Attack, EventData);
 }
 
 void UCombatAbility_MeleeWeapon::FinishExecute(FCombatEventData Payload)

@@ -20,6 +20,17 @@ void UCombatSystem_PlayMontage::OnMontageEnded(UAnimMontage* Montage, bool bInte
 	EndTask();
 }
 
+void UCombatSystem_PlayMontage::OnMontageInterrupted()
+{
+	if (StopPlayingMontage())
+	{
+		if (ShouldBroadcastAbilityTaskDelegates())
+		{
+			OnInterrupted.Broadcast();
+		}
+	}
+}
+
 UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCombatAbility* OwningAbility, FName TaskInstanceName, UAnimMontage* MontageToPlay, float Rate, FName StartSection,bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds)
 {
 	UCombatSystem_PlayMontage* MyObj = NewTask<UCombatSystem_PlayMontage>(*OwningAbility->GetCurrentActorInfo()->AvatarActor, TaskInstanceName);
@@ -55,6 +66,7 @@ void UCombatSystem_PlayMontage::Activate()
 			// {
 			// 	return;
 			// }
+			InterruptedHandle = Ability->OnCombatAbilityCancelled.AddUObject(this, &UCombatSystem_PlayMontage::OnMontageInterrupted);
 
 
 			MontageEndedDelegate.BindUObject(this, &UCombatSystem_PlayMontage::OnMontageEnded);
@@ -73,6 +85,19 @@ void UCombatSystem_PlayMontage::Activate()
 	}
 }
 
+
+void UCombatSystem_PlayMontage::OnDestroy(bool bInOwnerFinished)
+{
+	if (Ability)
+	{
+		Ability->OnCombatAbilityCancelled.Remove(InterruptedHandle);
+		if (bInOwnerFinished && bStopWhenAbilityEnds)
+		{
+			StopPlayingMontage();
+		}
+	}
+	Super::OnDestroy(bInOwnerFinished);
+}
 
 bool UCombatSystem_PlayMontage::StopPlayingMontage()
 {
@@ -95,29 +120,28 @@ bool UCombatSystem_PlayMontage::StopPlayingMontage()
 
 	// Check if the montage is still playing
 	// The ability would have been interrupted, in which case we should automatically stop the montage
-	UCombatSystem_AbilityComponent* CSC = CombatSystemComponent.Get();
-	// if (CSC && Ability)
-	// {
-	// 	if (CSC->GetAnimatingAbility() == Ability && CSC->GetCurrentMontage() == MontageToPlay)
-	// 	{
-	// 		// Unbind delegates so they don't get called as well
-	// 		FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(MontageToPlay);
-	// 		if (MontageInstance)
-	// 		{
-	// 			MontageInstance->OnMontageBlendingOutStarted.Unbind();
-	// 			MontageInstance->OnMontageEnded.Unbind();
-	// 		}
-	//
-	// 		CSC->CurrentMontageStop();
-	// 		return true;
-	// 	}
-	// }
+	UCombatSystem_AbilityComponent* CSAC = CombatSystemComponent.Get();
+	if (CSAC && Ability)
+	{
+		if (CSAC->GetAnimatingAbility() == Ability && CSAC->GetCurrentMontage() == MontageToPlay)
+		{
+			// Unbind delegates so they don't get called as well
+			FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(MontageToPlay);
+			if (MontageInstance)
+			{
+				MontageInstance->OnMontageBlendingOutStarted.Unbind();
+				MontageInstance->OnMontageEnded.Unbind();
+			}
+	
+			CSAC->CurrentMontageStop();
+			return true;
+		}
+	}
 
 	return false;
 }
 
 bool UCombatSystem_PlayMontage::ShouldBroadcastAbilityTaskDelegates() const
 {
-	//bool ShouldBroadcast = (Ability);
 	return Ability != nullptr;
 }

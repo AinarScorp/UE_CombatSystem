@@ -13,6 +13,7 @@ ACombatSystem_CharacterBase::ACombatSystem_CharacterBase()
 	CombatSystemComponent = CreateDefaultSubobject<UCombatSystem_AbilityComponent>("CombatSystemComponent");
 }
 
+
 UCombatSystem_AbilityComponent* ACombatSystem_CharacterBase::GetCombatAbilitySystemComponent() const
 {
 	return CombatSystemComponent;

@@ -158,7 +158,8 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 	// {
 	// 	AnimatingAbility->SetCurrentMontage(NewAnimMontage);
 	// }
-
+	AnimMontageInfo.AnimMontage = NewAnimMontage;
+	AnimMontageInfo.AnimatingAbility = AnimatingAbility;
 	// Start at a given Section.
 	if (StartSectionName != NAME_None)
 	{
@@ -168,6 +169,32 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 	return Duration;
 }
 
+void UCombatSystem_AbilityComponent::CurrentMontageStop(float OverrideBlendOutTime)
+{
+	UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->SkeletalMeshComponent->GetAnimInstance() : nullptr;
+	UAnimMontage* MontageToStop = AnimMontageInfo.AnimMontage;
+	if (AnimInstance && MontageToStop && !AnimInstance->Montage_GetIsStopped(MontageToStop))
+	{
+		const float BlendOutTime = (OverrideBlendOutTime >= 0.0f ? OverrideBlendOutTime : MontageToStop->BlendOut.GetBlendTime());
+		AnimInstance->Montage_Stop(BlendOutTime, MontageToStop);
+	}
+}
+
+UCombatAbility* UCombatSystem_AbilityComponent::GetAnimatingAbility() const
+{
+	return AnimMontageInfo.AnimatingAbility.Get();
+}
+
+UAnimMontage* UCombatSystem_AbilityComponent::GetCurrentMontage() const
+{
+	const UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->SkeletalMeshComponent->GetAnimInstance() : nullptr;
+	if (AnimMontageInfo.AnimMontage && AnimInstance && AnimInstance->Montage_IsActive(AnimMontageInfo.AnimMontage))
+	{
+		return AnimMontageInfo.AnimMontage;
+	}
+
+	return nullptr;
+}
 
 
 void UCombatSystem_AbilityComponent::RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec)
@@ -262,6 +289,19 @@ FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromHandle(FC
 	return nullptr;
 }
 
+FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromClass(const TSubclassOf<UCombatAbility> InAbilityClass)
+{
+	for (FCombatAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability->GetClass() == InAbilityClass)
+		{
+			return &Spec;
+		}
+	}
+
+	return nullptr;
+}
+
 void UCombatSystem_AbilityComponent::GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities,
                                                                                  bool bOnlyAbilitiesThatSatisfyTagRequirements) const
 {
@@ -321,6 +361,24 @@ bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByTag(const FGameplayTa
 	return bSuccess;
 }
 
+bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByClass(TSubclassOf<UCombatAbility> InAbilityToActivate, bool bAllowRemoteActivation)
+{
+	bool bSuccess = false;
+
+	const UCombatAbility* const InAbilityCDO = InAbilityToActivate.GetDefaultObject();
+
+	for (const FCombatAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability == InAbilityCDO)
+		{
+			bSuccess |= TryActivateAbility(Spec.Handle, bAllowRemoteActivation);
+			break;
+		}
+	}
+
+	return bSuccess;
+}
+
 bool UCombatSystem_AbilityComponent::TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload,UCombatSystem_AbilityComponent& Component)
 {
 	FCombatAbilitySpec* Spec = FindAbilitySpecFromHandle(AbilityToTrigger);
@@ -360,8 +418,8 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 		return false;
 	}
 
-	UCombatAbility* Ability = Spec->InstancedAbility;
-	if (!Ability)
+	UCombatAbility* InstancedAbility = Spec->InstancedAbility;
+	if (!InstancedAbility)
 	{
 		return false;
 	}
@@ -377,14 +435,25 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 		}
 	}
 	
-	if (!Ability->CanActivateAbility(Handle, ActorInfo,SourceTags,TargetTags))
+	if (!InstancedAbility->CanActivateAbility(Handle, ActorInfo,SourceTags,TargetTags))
 	{
 		//NotifyAbilityFailed(Handle, CanActivateAbilitySource, InternalTryActivateAbilityFailureTags);
 		return false;
 	}
+	if (Spec->IsActive())
+	{
+		if (InstancedAbility->bRetriggerInstancedAbility)
+		{
+			InstancedAbility->EndAbility(Handle, ActorInfo, false);
+		}
+		else
+		{
+			return false;
+		}
+	}
 
 	//Ability->CallActivateAbility(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
-	Ability->ActivateAbility(Handle, ActorInfo,TriggerEventData);
+	InstancedAbility->ActivateAbility(Handle, ActorInfo,TriggerEventData);
 	return true;
 }
 
@@ -404,6 +473,18 @@ FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility(const FComb
 	OwnedSpec.InstancedAbility->OnGiveAbility(AbilitySpec.Handle, CombatAbilityActorInfo.Get());
 	return OwnedSpec.Handle;
 }
+
+FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility_BP(TSubclassOf<UCombatAbility> AbilityClass)
+{
+	const FCombatAbilitySpec AbilitySpec = FCombatAbilitySpec(AbilityClass);
+	if (!IsValid(AbilitySpec.Ability))
+	{
+		return FCombatAbilitySpecHandle();
+	}
+	return GiveAbility(AbilitySpec);
+}
+
+
 
 void UCombatSystem_AbilityComponent::AbilitySpecInputPressed(FCombatAbilitySpec& Spec) const
 {
@@ -462,4 +543,10 @@ int32 UCombatSystem_AbilityComponent::HandleGameplayEvent(FGameplayTag EventTag,
 	// }
 
 	return TriggeredCount;
+}
+
+void UCombatSystem_AbilityComponent::NotifyAbilityEnded(FCombatAbilitySpecHandle Handle, UCombatAbility* Ability, bool bWasCancelled)
+{
+	AbilityEndedCallbacks.Broadcast(Ability);
+	AbilityEndedCallbacks_BP.Broadcast(Ability);
 }

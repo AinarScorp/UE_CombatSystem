@@ -20,12 +20,19 @@ void FCombatSystem_GameplayTags::AddAllTags(UGameplayTagsManager& Manager)
 {
 	AddTag(InputTag_Move, "InputTag.Move", "Move Input");
 	AddTag(InputTag_Look, "InputTag.Look", "Look Input");
+	AddTag(InputTag_Attack, "InputTag.Attack", "Attack Input");
+	AddTag(InputTag_RightClick, "InputTag.RightClick", "Magic Input");
 	AddTag(AttackInputWindow_Start, "AttackInputWindow.Start", "Used in AnimNotify to startListening for Input");
 	AddTag(AttackInputWindow_End, "AttackInputWindow.End", "Used in AnimNotify to finish Listening for Input");
 	AddTag(Weapon, "", "");
 	AddTag(Weapon_StartExecute, "Weapon.StartExecute", "Used in AnimNotify to Start sphere tracing for a weapon");
 	AddTag(Weapon_FinishExecute, "Weapon.FinishExecute", "Used in AnimNotify to finish sphere tracing for a weapon");
 	AddTag(Hit, "Hit", "");
+	AddTag(Hit_Attack, "Hit.Attack", "");
+	AddTag(Hit_Sneak, "Hit.Sneak", "");
+	AddTag(Actions_Attack_Primary, "Actions.Attack.Primary", "");
+	AddTag(Actions_Attack_Sneak, "Actions.Attack.Sneak", "");
+	AddTag(Actions_Attack_Magic, "Actions.Attack.Magic", "");
 	
 }
 

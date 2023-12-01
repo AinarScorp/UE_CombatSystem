@@ -22,12 +22,20 @@ protected:
 public:
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look;
+	FGameplayTag InputTag_Attack;
+	FGameplayTag InputTag_RightClick;
+	FGameplayTag Actions_Attack_Primary;
+	FGameplayTag Actions_Attack_Sneak;
+	FGameplayTag Actions_Attack_Magic;
+	
 	FGameplayTag AttackInputWindow_Start;
 	FGameplayTag AttackInputWindow_End;
 	FGameplayTag Weapon;
 	FGameplayTag Weapon_StartExecute;
 	FGameplayTag Weapon_FinishExecute;
 	FGameplayTag Hit;
+	FGameplayTag Hit_Attack;
+	FGameplayTag Hit_Sneak;
 
 private:
 	static FCombatSystem_GameplayTags GameplayTags;

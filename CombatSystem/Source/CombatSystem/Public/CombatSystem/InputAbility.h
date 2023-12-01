@@ -16,9 +16,9 @@ class COMBATSYSTEM_API UInputAbility : public UCombatAbility
 	GENERATED_BODY()
 	
 public:
-	UInputAbility();
 	void SetInputActionValue(const FInputActionValue& NewInputActionValue) const;
 
 protected:
+	UPROPERTY(BlueprintAssignable)
 	FOnInputActionValueSet OnInputActionValuesSet;
 };
