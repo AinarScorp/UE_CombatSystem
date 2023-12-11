@@ -22,18 +22,16 @@ void ACombatSystem_PlayerController::SetupInputComponent()
 	check(InputConfig);
 	UCombatSystem_InputComponent* CombatSystemInputComponent = CastChecked<UCombatSystem_InputComponent>(InputComponent);
 	const FCombatSystem_GameplayTags& GameplayTags = FCombatSystem_GameplayTags::Get();
-	
+
 	//Move action bindings
-	CombatSystemInputComponent->BindNativeAction(InputConfig,GameplayTags.InputTag_Move,ETriggerEvent::Triggered,this,&ACombatSystem_PlayerController::MoveInputTriggered);
-	CombatSystemInputComponent->BindNativeAction(InputConfig,GameplayTags.InputTag_Move,ETriggerEvent::Canceled,this,&ACombatSystem_PlayerController::MoveInputFinished);
-	CombatSystemInputComponent->BindNativeAction(InputConfig,GameplayTags.InputTag_Move,ETriggerEvent::Completed,this,&ACombatSystem_PlayerController::MoveInputFinished);
-	
-	CombatSystemInputComponent->BindNativeAction(InputConfig,GameplayTags.InputTag_Look,ETriggerEvent::Triggered,this,&ACombatSystem_PlayerController::LookInputTriggered);
-	
-	CombatSystemInputComponent->BindAbilityActions(InputConfig, this,&ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
-	CombatSystemInputComponent->BindAbilityActionsWithValue(InputConfig, this,&ThisClass::AbilityInputTagPressedWithValue, &ThisClass::AbilityInputTagReleasedWithValue);
-	
-	
+	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Triggered, this, &ACombatSystem_PlayerController::MoveInputTriggered);
+	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Canceled, this, &ACombatSystem_PlayerController::MoveInputFinished);
+	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Completed, this, &ACombatSystem_PlayerController::MoveInputFinished);
+
+	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Look, ETriggerEvent::Triggered, this, &ACombatSystem_PlayerController::LookInputTriggered);
+
+	CombatSystemInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased);
+	CombatSystemInputComponent->BindAbilityActionsWithValue(InputConfig, this, &ThisClass::AbilityInputTagPressedWithValue, &ThisClass::AbilityInputTagReleasedWithValue);
 }
 
 void ACombatSystem_PlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
@@ -56,40 +54,33 @@ void ACombatSystem_PlayerController::SetupInputs() const
 }
 
 
-
 void ACombatSystem_PlayerController::MoveInputTriggered(const FInputActionValue& InputActionValue)
 {
 	MoveInput = InputActionValue.Get<FVector2D>();
 }
+
 void ACombatSystem_PlayerController::MoveInputFinished(const FInputActionValue& InputActionValue)
 {
-	MoveInput = {0,0};
-	
+	MoveInput = {0, 0};
 }
 
 void ACombatSystem_PlayerController::LookInputTriggered(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 
-		// AddYawInput(InputAxisVector.X);
-		// AddPitchInput(InputAxisVector.Y);
-	if (APawn* ControlledPawn = GetPawn<APawn>())
-	{
-		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
-	}
+	AddYawInput(InputAxisVector.X);
+	AddPitchInput(InputAxisVector.Y);
 }
 
 
-void ACombatSystem_PlayerController::AbilityInputTagPressedWithValue(const FInputActionValue& InputActionValue,FGameplayTag InputTag)
+void ACombatSystem_PlayerController::AbilityInputTagPressedWithValue(const FInputActionValue& InputActionValue, FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagPressedWithValue(InputActionValue,InputTag);
+	GetCombatASC()->AbilityInputTagPressedWithValue(InputActionValue, InputTag);
 }
 
-void ACombatSystem_PlayerController::AbilityInputTagReleasedWithValue( const FInputActionValue& InputActionValue,FGameplayTag InputTag)
+void ACombatSystem_PlayerController::AbilityInputTagReleasedWithValue(const FInputActionValue& InputActionValue, FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagReleasedWithValue(InputActionValue,InputTag);
-
+	GetCombatASC()->AbilityInputTagReleasedWithValue(InputActionValue, InputTag);
 }
 
 void ACombatSystem_PlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
@@ -116,6 +107,3 @@ UCombatSystem_AbilityComponent* ACombatSystem_PlayerController::GetCombatASC()
 // 	AttackInput = true;
 // }
 //
-
-
-

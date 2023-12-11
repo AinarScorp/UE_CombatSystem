@@ -324,12 +324,12 @@ void UCombatSystem_AbilityComponent::GetActivatableAbilitySpecsByAllMatchingTags
 
 bool UCombatSystem_AbilityComponent::AreAbilityTagsBlocked(const FGameplayTagContainer& Tags) const
 {
-	return BlockedTags.HasAny(Tags);
+	return Tags.HasAny(BlockedTags);
 }
 
 bool UCombatSystem_AbilityComponent::ContainsAbilityTags(const FGameplayTagContainer& Tags) const
 {
-	return ContainedTags.HasAny(Tags);
+	return Tags.HasAny(ContainedTags);
 }
 
 bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
@@ -343,8 +343,9 @@ bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle
 
 	const FCombatAbilityActorInfo* ActorInfo = CombatAbilityActorInfo.Get();
 	if (ActorInfo == nullptr || !ActorInfo->OwnerActor.IsValid() || !ActorInfo->AvatarActor.IsValid()) return false;
-
+	
 	return InternalTryActivateAbility(AbilityToActivate);
+	
 }
 
 bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByTag(const FGameplayTagContainer& GameplayTagContainer, bool bAllowRemoteActivation)

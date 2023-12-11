@@ -11,8 +11,6 @@
 
 void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
-	UE_LOG(LogTemp,Display, TEXT("%s ActivateAbility"),*GetName())
-
 	Super::ActivateAbility(Handle, ActorInfo,TriggerEventData);
 	CurrentComboIndex = 0;
 	ListeningToInput = false;
@@ -21,10 +19,7 @@ void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle
 
 void UCombatAbility_Combo::InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
 {
-	UE_LOG(LogTemp,Display, TEXT("%s InputPressed"),*GetName())
-
 	if (!ListeningToInput) return;
-	UE_LOG(LogTemp,Display, TEXT("%s InputPressed and succeded"),*GetName())
 
 	ListeningToInput = false;
 	Super::InputPressed(Handle, ActorInfo);
@@ -52,12 +47,11 @@ void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, con
 void UCombatAbility_Combo::StartNextAttack()
 {
 	if (Combos.Num()<= CurrentComboIndex) return;
-	UE_LOG(LogTemp,Display, TEXT("%s StartNextAttack :BEGIN"),*GetName())
 	const FComboAnimInfo& ComboInfo = Combos[CurrentComboIndex];
 	CurrentComboIndex++;
 	RotateToMoveInput();
 	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
-	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::MontageStoppedPlaying);
+	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
 	MontageTask->ReadyForActivation();
 	
 	StartNewWaitTaskForInputWindowStart();
@@ -83,25 +77,15 @@ void UCombatAbility_Combo::StartNewWaitTaskForInputWindowEnd()
 	WaitForInputWindowEndTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowEnded);
 	WaitForInputWindowEndTask->ReadyForActivation();
 }
-void UCombatAbility_Combo::MontageStoppedPlaying()
-{
-	UE_LOG(LogTemp,Display, TEXT("%s MontageStoppedPlaying"),*GetName())
 
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, false);
-	
-}
 
 void UCombatAbility_Combo::AttackInputWindowStarted(FCombatEventData Payload)
 {
-	UE_LOG(LogTemp,Display, TEXT("%s AttackInputWindowStarted"),*GetName())
-
 	ListeningToInput = true;
 }
 
 void UCombatAbility_Combo::AttackInputWindowEnded(FCombatEventData Payload)
 {
-	UE_LOG(LogTemp,Display, TEXT("%s AttackInputWindowEnded"),*GetName())
-
 	StartNextAttack();
 }
 

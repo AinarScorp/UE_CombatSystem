@@ -31,8 +31,8 @@ public:
 	virtual void EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled) override;
 protected:
 	virtual void StartNextAttack();
-	UFUNCTION()
-	virtual void MontageStoppedPlaying();
+	// UFUNCTION()
+	// virtual void MontageStoppedPlaying();
 	UFUNCTION()
 	virtual void AttackInputWindowStarted(FCombatEventData Payload);
 	UFUNCTION()
