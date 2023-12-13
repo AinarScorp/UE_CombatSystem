@@ -21,9 +21,18 @@ struct FGameplayTagContainerWithCount
 {
 public:
 	GENERATED_BODY()
-	void RemoveTags(FGameplayTagContainer& Container);
-	FGameplayTagContainer GetTags() {return ExplicitTags;}
+	
+	void RemoveTags(const FGameplayTagContainer& Container);
+	void AddTags(const FGameplayTagContainer& Container);
+	
+	const FGameplayTagContainer& GetTags() const {return ExplicitTags;}
 private:
+	
+	bool UpdateExplicitTags(const FGameplayTag& Tag, const bool ToIncrease);
+private:
+	UPROPERTY(VisibleAnywhere)
+	TMap<FGameplayTag, int32> ExplicitTagCountMap;
+
 	UPROPERTY(VisibleAnywhere)
 	FGameplayTagContainer ExplicitTags;
 };

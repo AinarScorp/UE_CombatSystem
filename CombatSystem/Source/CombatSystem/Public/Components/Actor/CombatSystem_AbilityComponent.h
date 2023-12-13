@@ -34,7 +34,7 @@ class COMBATSYSTEM_API UCombatSystem_AbilityComponent : public UGameplayTasksCom
 {
 	GENERATED_BODY()
 public:
-	FORCEINLINE FGameplayTagContainer GetContainedAbilityTags() const {return ContainedTags;};
+	FORCEINLINE const FGameplayTagContainer& GetContainedAbilityTags() const {return ContainedTags.GetTags();};
 	
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor);
 	virtual void OnRegister() override;
@@ -104,9 +104,9 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	FGameplayTagContainer BlockedTags;
+	FGameplayTagContainerWithCount BlockedTags;
 	UPROPERTY(VisibleAnywhere)
-	FGameplayTagContainer ContainedTags;
+	FGameplayTagContainerWithCount ContainedTags;
 	
 
 
