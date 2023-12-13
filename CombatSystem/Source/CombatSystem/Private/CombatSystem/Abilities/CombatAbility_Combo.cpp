@@ -6,6 +6,7 @@
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "CombatSystem/Tasks/CombatSystem_WaitGameplayEvent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Library/EinarGameplayLibrary.h"
 #include "Player/Controller/CombatSystem_PlayerController.h"
 #include "Tags/CombatSystem_GameplayTags.h"
 
@@ -50,10 +51,11 @@ void UCombatAbility_Combo::StartNextAttack()
 	const FComboAnimInfo& ComboInfo = Combos[CurrentComboIndex];
 	CurrentComboIndex++;
 	RotateToMoveInput();
-	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
-	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
-	MontageTask->ReadyForActivation();
 	
+	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
+	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
+	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);
+	MontageTask->ReadyForActivation();
 	StartNewWaitTaskForInputWindowStart();
 }
 void UCombatAbility_Combo::StartNewWaitTaskForInputWindowStart()
@@ -94,13 +96,8 @@ void UCombatAbility_Combo::RotateToMoveInput() const
 	if (!bShouldRotateToInput || !CurrentActorInfo->Controller.Get()) return;
 	const ACombatSystem_PlayerController* PlayerController = Cast<ACombatSystem_PlayerController>(CurrentActorInfo->Controller);
 	if (!PlayerController) return;
+	UEinarGameplayLibrary::RotateToMoveInput(CurrentActorInfo->AvatarActor.Get(),PlayerController->GetMoveInput(), PlayerController->GetControlRotation().Yaw);
 
-	const FVector2D MoveInput =PlayerController->GetMoveInput();
-	if (MoveInput == FVector2D::ZeroVector) return;
-	const FRotator RotFromMoveInput = UKismetMathLibrary::MakeRotFromX(FVector(MoveInput.X, MoveInput.Y,0));
-	const FRotator RotFromCurrentRotation = FRotator(0, CurrentActorInfo->Controller->GetControlRotation().Yaw,0);
-	
-	CurrentActorInfo->AvatarActor->SetActorRotation(UKismetMathLibrary::ComposeRotators(RotFromMoveInput, RotFromCurrentRotation));
 }
 
 

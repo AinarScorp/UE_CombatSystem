@@ -32,7 +32,6 @@ void UMoveAbility::ExecuteMove(const FInputActionValue& InputActionValue)
 	}
 	if (!CurrentActorInfo->Controller.Get()) return;
 
-	UE_LOG(LogTemp, Warning, TEXT("I am moving with input %s"), *MoveInput.ToString())
 	const FRotator YawRotation(0.f, CurrentActorInfo->Controller->GetControlRotation().Yaw, 0.f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);

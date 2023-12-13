@@ -23,6 +23,7 @@ struct FCombatAbilityActorInfo
 	TWeakObjectPtr<UAnimInstance> AnimInstance;
 	UPROPERTY(BlueprintReadOnly, Category = "ActorInfo")
 	TWeakObjectPtr<UCombatSystem_AbilityComponent>	CombatAbilitySystemComponent;
+	//TODO: Maybe add Player controller and AI controller to avoid casting?
 	UPROPERTY(BlueprintReadOnly, Category = "ActorInfo")
 	TWeakObjectPtr<AController>	Controller;
 

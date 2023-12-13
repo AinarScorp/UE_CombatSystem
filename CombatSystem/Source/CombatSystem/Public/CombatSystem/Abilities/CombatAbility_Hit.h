@@ -6,6 +6,8 @@
 #include "CombatSystem/Abilities/CombatAbility.h"
 #include "CombatAbility_Hit.generated.h"
 
+//TODO: Combine with Combo animations
+
 USTRUCT()
 struct FHitMontageWithSection
 {

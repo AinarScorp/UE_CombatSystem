@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
+#include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "Components/Actor/CombatSystem_AbilityComponent.h"
 #include "CombatAbility.generated.h"
 
+
+class UCombatSystem_WaitGameplayEvent;
 
 UENUM(BlueprintType)
 enum ECombatAbilityTriggerSource : uint8
@@ -98,6 +101,10 @@ public:
 protected:
 	UFUNCTION()
 	virtual void InternalEndAbility();
+	UFUNCTION()
+	virtual void InternalCancelAbility();
+	// template<class UserClass,class FuncName>
+	// UCombatSystem_PlayMontage* StartMontageTask(UserClass* Object, UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction = nullptr,FuncName OnInterruptedFunc = nullptr);
 
 public:
 	FOnCombatAbilityCancelled OnCombatAbilityCancelled;
@@ -136,3 +143,18 @@ protected:
 	UPROPERTY()
 	bool bIsActive;
 };
+// template <class UserClass, typename FuncName>
+// UCombatSystem_PlayMontage* UCombatAbility::StartMontageTask(UserClass* Object,UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction, FuncName OnInterruptedFunc)
+// {
+// 	UCombatSystem_PlayMontage* MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), MontageToPlay, 1, StartSection);
+// 	if (OnCompletedFunction)
+// 	{
+// 		MontageTask->OnCompleted.AddDynamic(Object, OnCompletedFunction);
+// 	}
+// 	if (OnInterruptedFunc)
+// 	{
+// 		MontageTask->OnInterrupted.AddDynamic(Object,OnInterruptedFunc);
+// 	}
+// 	MontageTask->ReadyForActivation();
+// 	return MontageTask;
+// }

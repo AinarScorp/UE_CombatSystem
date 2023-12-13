@@ -218,6 +218,12 @@ void UCombatAbility::InternalEndAbility()
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, false);
 }
 
+void UCombatAbility::InternalCancelAbility()
+{
+	EndAbility(CurrentSpecHandle, CurrentActorInfo, true);
+}
+
+
 void UCombatAbility::InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo)
 {
 	BP_OnInputPressed();

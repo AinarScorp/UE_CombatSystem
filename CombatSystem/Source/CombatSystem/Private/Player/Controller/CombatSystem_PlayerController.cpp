@@ -24,6 +24,7 @@ void ACombatSystem_PlayerController::SetupInputComponent()
 	const FCombatSystem_GameplayTags& GameplayTags = FCombatSystem_GameplayTags::Get();
 
 	//Move action bindings
+	//CombatSystemInputComponent->BindAction()
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Triggered, this, &ACombatSystem_PlayerController::MoveInputTriggered);
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Canceled, this, &ACombatSystem_PlayerController::MoveInputFinished);
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Completed, this, &ACombatSystem_PlayerController::MoveInputFinished);

@@ -28,3 +28,13 @@ public:
 	float DrawTime = 5.f;
 
 };
+
+USTRUCT(BlueprintType)
+struct FMontageWithSection
+{
+	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AnimMontage;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	FName AnimSection;
+};

@@ -3,6 +3,8 @@
 
 #include "Library/EinarGameplayLibrary.h"
 
+#include "Kismet/KismetMathLibrary.h"
+
 ERelativeContext UEinarGameplayLibrary::GetActorRelativeContextSingle(const AActor* ThisActor, const FVector& Location)
 {
 	FVector LocalSpaceLocation = ThisActor->GetActorTransform().InverseTransformPosition(Location).GetSafeNormal();
@@ -35,33 +37,38 @@ ERelativeContext_BP UEinarGameplayLibrary::GetActorRelativeContext_BP(const AAct
 
 int32 UEinarGameplayLibrary::GetRelativeContext(const AActor* ThisActor, const AActor* Other)
 {
+	return GetRelativeContextFromVector(ThisActor,Other->GetActorLocation());
+}
+
+int32 UEinarGameplayLibrary::GetRelativeContextFromVector(const AActor* ThisActor, const FVector RelativeVector)
+{
 	int32 ReturnContext = 0;
 
-	const UE::Math::TVector<double> LocalSpaceLocation = ThisActor->GetActorTransform().InverseTransformPosition(Other->GetActorLocation());
-
-	if (LocalSpaceLocation.X > 0)
+	const UE::Math::TVector<double> LocalSpaceLocation = ThisActor->GetActorTransform().InverseTransformPosition(RelativeVector);
+	UE_LOG(LogTemp,Display,TEXT("LocalSpaceLocation equals: %s"),*LocalSpaceLocation.ToString())
+	if (LocalSpaceLocation.X > 0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::InFront);
 	}
-	else if (LocalSpaceLocation.X < 0)
+	else if (LocalSpaceLocation.X < -0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::Behind);
 	}
 
-	if (LocalSpaceLocation.Y > 0)
+	if (LocalSpaceLocation.Y > 0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::ToTheRight);
 	}
-	else if (LocalSpaceLocation.Y < 0)
+	else if (LocalSpaceLocation.Y < -0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::ToTheLeft);
 	}
 
-	if (LocalSpaceLocation.Z > 0)
+	if (LocalSpaceLocation.Z > 0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::Above);
 	}
-	else if (LocalSpaceLocation.Z < 0)
+	else if (LocalSpaceLocation.Z < -0.00001f)
 	{
 		ReturnContext |= 1 << static_cast<int32>(ERelativeContext::Below);
 	}
@@ -71,4 +78,18 @@ int32 UEinarGameplayLibrary::GetRelativeContext(const AActor* ThisActor, const A
 bool UEinarGameplayLibrary::ContextPredicate(const int32 Test, const int32 Value)
 {	
 	return (Test & Value) == Value;
+}
+
+bool UEinarGameplayLibrary::FlagPredicate(const int32 Test, const int32 Value)
+{
+	return (((Test) & (1 << static_cast<int32>(Value))) > 0);
+}
+
+bool UEinarGameplayLibrary::RotateToMoveInput(AActor* ActorToRotate, const FVector2D MoveInput, const float CurrentYaw)
+{
+	if (MoveInput == FVector2D::ZeroVector) return false;
+	const FRotator RotFromMoveInput = UKismetMathLibrary::MakeRotFromX(FVector(MoveInput.X, MoveInput.Y,0));
+	const FRotator CurrentRotation = FRotator(0, CurrentYaw,0);
+	ActorToRotate->SetActorRotation(UKismetMathLibrary::ComposeRotators(RotFromMoveInput, CurrentRotation));
+	return true;
 }

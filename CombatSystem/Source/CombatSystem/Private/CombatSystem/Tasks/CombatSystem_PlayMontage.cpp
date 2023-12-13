@@ -36,7 +36,6 @@ UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCo
 	UCombatSystem_PlayMontage* MyObj = NewTask<UCombatSystem_PlayMontage>(*OwningAbility->GetCurrentActorInfo()->AvatarActor, TaskInstanceName);
 	MyObj->Ability = OwningAbility;
 	MyObj->CombatSystemComponent = OwningAbility->GetCurrentActorInfo()->CombatAbilitySystemComponent;
-
 	MyObj->MontageToPlay = MontageToPlay;
 	MyObj->Rate = Rate;
 	MyObj->StartSection = StartSection;

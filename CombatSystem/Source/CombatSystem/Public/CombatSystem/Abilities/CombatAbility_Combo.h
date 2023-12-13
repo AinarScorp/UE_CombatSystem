@@ -7,7 +7,7 @@
 #include "CombatAbility_Combo.generated.h"
 
 class UCombatSystem_PlayMontage;
-
+//TODO: Combine with Hit animations
 USTRUCT(BlueprintType)
 struct FComboAnimInfo
 {

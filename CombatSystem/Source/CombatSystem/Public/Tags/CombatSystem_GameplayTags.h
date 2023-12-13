@@ -23,10 +23,12 @@ public:
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look;
 	FGameplayTag InputTag_Attack;
+	FGameplayTag InputTag_Dodge;
 	FGameplayTag InputTag_RightClick;
 	FGameplayTag Actions_Attack_Primary;
 	FGameplayTag Actions_Attack_Sneak;
 	FGameplayTag Actions_Attack_Magic;
+	FGameplayTag Actions_Dodge;
 	
 	FGameplayTag AttackInputWindow_Start;
 	FGameplayTag AttackInputWindow_End;
