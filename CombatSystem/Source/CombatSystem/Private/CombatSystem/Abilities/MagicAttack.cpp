@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/MagicAttack.h"
+#include "CombatSystem/Abilities/MagicAttack.h"
 
 void UMagicAttack::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {

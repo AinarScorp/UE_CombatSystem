@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatSystem/CombatAbility.h"
-#include "Tasks/CombatTask_SummonProjectiles.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
+#include "CombatSystem/Tasks/CombatTask_SummonProjectiles.h"
 #include "SurroundAttack.generated.h"
 
 /**

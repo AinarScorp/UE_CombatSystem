@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InputAbility.h"
-#include "CombatSystem/CombatAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
 #include "MoveAbility.generated.h"
 
 /**

@@ -3,7 +3,7 @@
 
 #include "CombatSystem/Tasks/CombatTask_SummonProjectiles.h"
 
-#include "CombatSystem/SurroundAttack.h"
+#include "CombatSystem/Abilities/SurroundAttack.h"
 #include "Library/EinarMathLibrary.h"
 
 

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/CombatAbility_MeleeWeapon.h"
+#include "CombatSystem/Abilities/CombatAbility_MeleeWeapon.h"
 
 #include "Actors/CombatSystem_WeaponBase.h"
 #include "CombatSystem/Library/CombatSystem_AbilityLibrary.h"

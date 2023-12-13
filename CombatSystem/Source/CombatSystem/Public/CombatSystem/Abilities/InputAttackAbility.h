@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatSystem/InputAbility.h"
+#include "CombatSystem/Abilities/InputAbility.h"
 #include "Data/CombatSystem_CharacterStartupInfo.h"
 #include "InputAttackAbility.generated.h"
 

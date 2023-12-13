@@ -2,7 +2,7 @@
 
 
 #include "CombatSystem/Structs/CombatAbilitySpec.h"
-#include "CombatSystem/CombatAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
 
 bool FCombatAbilitySpec::IsActive() const
 {

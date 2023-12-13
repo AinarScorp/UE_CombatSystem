@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/CombatAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
 
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 #include "CombatSystem/Structs/CombatAbilitySpecHandle.h"

@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 #include "Components/Actor/CombatSystem_AbilityComponent.h"
-#include "Structs/CombatAbilityActorInfo.h"
 #include "CombatAbility.generated.h"
 
 

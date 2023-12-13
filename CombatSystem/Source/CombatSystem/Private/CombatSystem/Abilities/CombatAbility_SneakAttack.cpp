@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/CombatAbility_SneakAttack.h"
+#include "CombatSystem/Abilities/CombatAbility_SneakAttack.h"
 
 #include "CombatSystem/Library/CombatSystem_AbilityLibrary.h"
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"

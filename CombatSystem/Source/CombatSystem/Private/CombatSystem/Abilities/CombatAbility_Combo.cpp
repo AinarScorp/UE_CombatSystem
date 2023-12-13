@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/CombatAbility_Combo.h"
+#include "CombatSystem/Abilities/CombatAbility_Combo.h"
 
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "CombatSystem/Tasks/CombatSystem_WaitGameplayEvent.h"

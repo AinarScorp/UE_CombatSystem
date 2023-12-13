@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CombatSystem/CombatAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
 #include "CombatAbility_Hit.generated.h"
 
 USTRUCT()

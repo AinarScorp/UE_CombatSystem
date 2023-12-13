@@ -3,7 +3,7 @@
 
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 
-#include "CombatSystem/CombatAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
 #include "Components/Actor/CombatSystem_AbilityComponent.h"
 #include "Interfaces/CombatSystem_AbilityInterface.h"
 

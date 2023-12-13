@@ -4,8 +4,8 @@
 #include "Components/Actor/CombatSystem_AbilityComponent.h"
 
 #include "GameplayTagContainer.h"
-#include "CombatSystem/CombatAbility.h"
-#include "CombatSystem/InputAbility.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
+#include "CombatSystem/Abilities/InputAbility.h"
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 #include "Interfaces/CombatSystem_AbilityInterface.h"
 
@@ -224,7 +224,7 @@ void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGamep
 	//TODO: Check what happens if one thing removes tags, but there should be another one with the same
 	if (bEnableBlockTags)
 	{
-		BlockedTags.AppendTags(BlockTags);
+		BlockedTags.AddTags(BlockTags);
 	}
 	else
 	{
@@ -239,14 +239,13 @@ void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGamep
 
 void UCombatSystem_AbilityComponent::ApplyAbilityContainedTags(const FGameplayTagContainer& AbilityTags, bool bRemove)
 {
-	//TODO: Check what happens if one thing removes tags, but there should be another one with the same
 	if (bRemove)
 	{
 		ContainedTags.RemoveTags(AbilityTags);
 	}
 	else
 	{
-		ContainedTags.AppendTags(AbilityTags);
+		ContainedTags.AddTags(AbilityTags);
 	}
 }
 
@@ -324,12 +323,12 @@ void UCombatSystem_AbilityComponent::GetActivatableAbilitySpecsByAllMatchingTags
 
 bool UCombatSystem_AbilityComponent::AreAbilityTagsBlocked(const FGameplayTagContainer& Tags) const
 {
-	return Tags.HasAny(BlockedTags);
+	return Tags.HasAny(BlockedTags.GetTags());
 }
 
 bool UCombatSystem_AbilityComponent::ContainsAbilityTags(const FGameplayTagContainer& Tags) const
 {
-	return Tags.HasAny(ContainedTags);
+	return Tags.HasAny(ContainedTags.GetTags());
 }
 
 bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
@@ -424,7 +423,7 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 	{
 		return false;
 	}
-	const FGameplayTagContainer* SourceTags = &ContainedTags;
+	const FGameplayTagContainer* SourceTags = &ContainedTags.GetTags();
 	const FGameplayTagContainer* TargetTags = nullptr;
 	if (TriggerEventData != nullptr && TriggerEventData->Target)
 	{

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CombatSystem/CombatAbility_Hit.h"
+#include "CombatSystem/Abilities/CombatAbility_Hit.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "Library/EinarGameplayLibrary.h"
