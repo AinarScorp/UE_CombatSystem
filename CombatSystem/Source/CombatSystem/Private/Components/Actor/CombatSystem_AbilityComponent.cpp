@@ -152,12 +152,11 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 
 	Duration = AnimInstance->Montage_Play(NewAnimMontage, InPlayRate, EMontagePlayReturnType::MontageLength, StartTimeSeconds);
 	if (Duration <= 0.f) return Duration;
-
-	//
-	// if (AnimatingAbility)
-	// {
-	// 	AnimatingAbility->SetCurrentMontage(NewAnimMontage);
-	// }
+	
+	if (AnimatingAbility)
+	{
+		AnimatingAbility->SetCurrentMontage(NewAnimMontage);
+	}
 	AnimMontageInfo.AnimMontage = NewAnimMontage;
 	AnimMontageInfo.AnimatingAbility = AnimatingAbility;
 	// Start at a given Section.
@@ -177,6 +176,15 @@ void UCombatSystem_AbilityComponent::CurrentMontageStop(float OverrideBlendOutTi
 	{
 		const float BlendOutTime = (OverrideBlendOutTime >= 0.0f ? OverrideBlendOutTime : MontageToStop->BlendOut.GetBlendTime());
 		AnimInstance->Montage_Stop(BlendOutTime, MontageToStop);
+	}
+}
+
+void UCombatSystem_AbilityComponent::ClearAnimatingAbility(UCombatAbility* Ability)
+{
+	if (AnimMontageInfo.AnimatingAbility.Get() == Ability)
+	{
+		Ability->SetCurrentMontage(nullptr);
+		AnimMontageInfo.AnimatingAbility = nullptr;
 	}
 }
 
@@ -547,6 +555,10 @@ int32 UCombatSystem_AbilityComponent::HandleGameplayEvent(FGameplayTag EventTag,
 
 void UCombatSystem_AbilityComponent::NotifyAbilityEnded(FCombatAbilitySpecHandle Handle, UCombatAbility* Ability, bool bWasCancelled)
 {
+	if (AnimMontageInfo.AnimatingAbility.Get() == Ability)
+	{
+		ClearAnimatingAbility(Ability);
+	}
 	AbilityEndedCallbacks.Broadcast(Ability);
 	AbilityEndedCallbacks_BP.Broadcast(Ability);
 }

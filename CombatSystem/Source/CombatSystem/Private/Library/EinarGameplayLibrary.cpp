@@ -80,7 +80,7 @@ bool UEinarGameplayLibrary::ContextPredicate(const int32 Test, const int32 Value
 	return (Test & Value) == Value;
 }
 
-bool UEinarGameplayLibrary::FlagPredicate(const int32 Test, const int32 Value)
+bool UEinarGameplayLibrary::FlagPredicate(const int32 Test, const ERelativeContext Value)
 {
 	return (((Test) & (1 << static_cast<int32>(Value))) > 0);
 }

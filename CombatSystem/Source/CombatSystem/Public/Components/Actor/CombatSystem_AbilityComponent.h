@@ -76,6 +76,7 @@ public:
 
 	virtual float PlayMontage(UCombatAbility* AnimatingAbility, UAnimMontage* NewAnimMontage, float InPlayRate, FName StartSectionName = NAME_None, float StartTimeSeconds = 0.0f);
 	virtual void CurrentMontageStop(float OverrideBlendOutTime = -1.0f);
+	virtual void ClearAnimatingAbility(UCombatAbility* Ability);
 
 	UCombatAbility* GetAnimatingAbility() const;
 	UAnimMontage* GetCurrentMontage() const;

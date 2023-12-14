@@ -20,16 +20,39 @@ void UCombatSystem_PlayMontage::OnMontageEnded(UAnimMontage* Montage, bool bInte
 	EndTask();
 }
 
-void UCombatSystem_PlayMontage::OnMontageInterrupted()
+
+void UCombatSystem_PlayMontage::OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (StopPlayingMontage())
+	if (!Ability) return;
+
+	if (Ability->GetCurrentMontage() == MontageToPlay)
 	{
-		if (ShouldBroadcastAbilityTaskDelegates())
+		if (Montage == MontageToPlay)
 		{
-			OnInterrupted.Broadcast();
+			if (UCombatSystem_AbilityComponent* CSAC = CombatSystemComponent.Get())
+			{
+				CSAC->ClearAnimatingAbility(Ability);
+			}
 		}
 	}
+
+	if (bInterrupted)
+	{
+		OnInterrupted.Broadcast();
+	}
+	else
+	{
+		OnBlendOut.Broadcast();
+	}
 }
+void UCombatSystem_PlayMontage::OnMontageInterrupted()
+{
+	if (StopPlayingMontage() && Ability)
+	{
+		OnInterrupted.Broadcast();
+	}
+}
+
 
 UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCombatAbility* OwningAbility, FName TaskInstanceName, UAnimMontage* MontageToPlay, float Rate, FName StartSection,bool bStopWhenAbilityEnds, float AnimRootMotionTranslationScale, float StartTimeSeconds)
 {
@@ -39,7 +62,7 @@ UCombatSystem_PlayMontage* UCombatSystem_PlayMontage::CreatePlayMontageProxy(UCo
 	MyObj->MontageToPlay = MontageToPlay;
 	MyObj->Rate = Rate;
 	MyObj->StartSection = StartSection;
-	MyObj->AnimRootMotionTranslationScale = AnimRootMotionTranslationScale;
+	//MyObj->AnimRootMotionTranslationScale = AnimRootMotionTranslationScale;
 	MyObj->bStopWhenAbilityEnds = bStopWhenAbilityEnds;
 	MyObj->StartTimeSeconds = StartTimeSeconds;
 
@@ -67,7 +90,7 @@ void UCombatSystem_PlayMontage::Activate()
 			// }
 			InterruptedHandle = Ability->OnCombatAbilityCancelled.AddUObject(this, &UCombatSystem_PlayMontage::OnMontageInterrupted);
 
-
+			
 			MontageEndedDelegate.BindUObject(this, &UCombatSystem_PlayMontage::OnMontageEnded);
 			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
 			bPlayedMontage = true;
@@ -75,13 +98,10 @@ void UCombatSystem_PlayMontage::Activate()
 	}
 
 
-	if (!bPlayedMontage)
-	{
-		// if (ShouldBroadcastAbilityTaskDelegates())
-		// {
-		// 	OnCancelled.Broadcast();
-		// }
-	}
+	// if (!bPlayedMontage)
+	// {
+	// 	//OnCancelled.Broadcast();
+	// }
 }
 
 

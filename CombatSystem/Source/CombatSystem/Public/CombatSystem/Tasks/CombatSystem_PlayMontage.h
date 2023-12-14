@@ -7,7 +7,7 @@
 #include "CombatSystem_PlayMontage.generated.h"
 class UCombatAbility;
 class UCombatSystem_AbilityComponent;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMontageWaitSimpleDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMontageSimpleDelegate);
 
 /**
  * 
@@ -26,21 +26,25 @@ public:
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 	void OnMontageInterrupted();
-
+	UFUNCTION()
+	void OnMontageBlendingOut(UAnimMontage* Montage, bool bInterrupted);
 	virtual void Activate() override;
 	
 	bool ShouldBroadcastAbilityTaskDelegates() const;
 public:
 	UPROPERTY(BlueprintAssignable)
-	FMontageWaitSimpleDelegate	OnCompleted;
+	FMontageSimpleDelegate	OnCompleted;
 	UPROPERTY(BlueprintAssignable)
-	FMontageWaitSimpleDelegate	OnInterrupted;
+	FMontageSimpleDelegate	OnBlendOut;
+	UPROPERTY(BlueprintAssignable)
+	FMontageSimpleDelegate	OnInterrupted;
 protected:
 	virtual void OnDestroy(bool bInOwnerFinished) override;
 
 	/** Checks if the ability is playing a montage and stops that montage, returns true if a montage was stopped, false if not. */
 	bool StopPlayingMontage();
-
+	
+	FOnMontageBlendingOutStarted BlendingOutDelegate;
 	FOnMontageEnded MontageEndedDelegate;
 	FDelegateHandle InterruptedHandle;
 

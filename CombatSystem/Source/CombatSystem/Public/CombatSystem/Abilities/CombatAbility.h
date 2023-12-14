@@ -90,6 +90,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnInputReleased")
 	void BP_OnInputReleased();
 
+	UFUNCTION(BlueprintCallable, Category = Animation)
+	UAnimMontage* GetCurrentMontage() const;
+	virtual void SetCurrentMontage(class UAnimMontage* InCurrentMontage);
+
 	/** Returns the actor info associated with this ability, has cached pointers to useful objects */
 	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
 	FCombatAbilityActorInfo GetActorInfo() const { return *CurrentActorInfo; };
@@ -142,6 +146,8 @@ protected:
 	bool bIsCancelable = true;
 	UPROPERTY()
 	bool bIsActive;
+	UPROPERTY()
+	TObjectPtr<class UAnimMontage> CurrentMontage;
 };
 // template <class UserClass, typename FuncName>
 // UCombatSystem_PlayMontage* UCombatAbility::StartMontageTask(UserClass* Object,UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction, FuncName OnInterruptedFunc)

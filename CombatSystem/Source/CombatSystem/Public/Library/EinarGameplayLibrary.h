@@ -27,7 +27,7 @@ public:
 	static bool ContextPredicate(const int32 Test, const int32 Value);
 	// Used for checking a single flag
 	UFUNCTION(BlueprintCallable, Category = "Context")
-	static bool FlagPredicate(int32 Test, const int32 Value);
+	static bool FlagPredicate(int32 Test, const ERelativeContext Value);
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	static bool RotateToMoveInput(AActor* ActorToRotate, FVector2D MoveInput, float CurrentYaw);
 	

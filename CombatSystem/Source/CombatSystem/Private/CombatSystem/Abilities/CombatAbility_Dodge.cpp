@@ -55,10 +55,9 @@ FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontageFromLocking()
 
 FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontage(ERelativeContext RelativeContext)
 {
-	int32 IntFromEnum = static_cast<int32>(RelativeContext);
 	for (FDodgeMontage& DodgeMontage : DodgeMontages)
 	{
-		if (UEinarGameplayLibrary::FlagPredicate(DodgeMontage.Direction,IntFromEnum))
+		if (UEinarGameplayLibrary::FlagPredicate(DodgeMontage.Direction,RelativeContext))
 		{
 			return &DodgeMontage.Montage;
 		}

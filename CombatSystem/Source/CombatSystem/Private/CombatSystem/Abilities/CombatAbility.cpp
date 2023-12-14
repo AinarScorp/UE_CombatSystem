@@ -213,6 +213,17 @@ void UCombatAbility::BP_EndAbility()
 	InternalEndAbility();
 }
 
+UAnimMontage* UCombatAbility::GetCurrentMontage() const
+{
+	return CurrentMontage;
+
+}
+
+void UCombatAbility::SetCurrentMontage(UAnimMontage* InCurrentMontage)
+{
+	CurrentMontage = InCurrentMontage;
+}
+
 void UCombatAbility::InternalEndAbility()
 {
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, false);
