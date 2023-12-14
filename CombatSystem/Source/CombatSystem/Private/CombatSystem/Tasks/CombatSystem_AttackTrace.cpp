@@ -11,12 +11,12 @@ UCombatSystem_AttackTrace::UCombatSystem_AttackTrace(const FObjectInitializer& O
 void UCombatSystem_AttackTrace::Activate()
 {
 	Super::Activate();
-	if (!OwningActor.IsValid() || !SkeletalMesh.IsValid())
+	if (!SkeletalMesh.IsValid() || !OwningAbility)
 	{
 		EndTask();
 		return;
 	}
-	StartTraceLocation = SkeletalMesh.Get()->GetSocketLocation(WeaponCenterSocketName);
+	StartTraceLocation = SkeletalMesh->GetSocketLocation(WeaponCenterSocketName);
 
 }
 

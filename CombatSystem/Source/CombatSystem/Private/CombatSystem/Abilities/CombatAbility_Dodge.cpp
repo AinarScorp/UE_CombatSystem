@@ -3,31 +3,42 @@
 
 #include "CombatSystem/Abilities/CombatAbility_Dodge.h"
 
+#include "CombatSystem/Tasks/CombatSystem_ApplyMotion.h"
+#include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "Library/EinarGameplayLibrary.h"
 #include "Player/Controller/CombatSystem_PlayerController.h"
 
 void UCombatAbility_Dodge::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, TriggerEventData);
-	FMontageWithSection* DodgeMontage = GetDodgeMontage();
+	const FMontageWithSection* DodgeMontage = GetDodgeMontage();
 	if (!DodgeMontage)
 	{
 		InternalCancelAbility();
 		return;
 	}
 	
-	UCombatSystem_PlayMontage *MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), DodgeMontage->AnimMontage, 1, DodgeMontage->AnimSection);
-	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Dodge::InternalEndAbility);
+	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), DodgeMontage->AnimMontage, 1, DodgeMontage->AnimSection,false);
+	MontageTask->OnBlendOut.AddDynamic(this, &UCombatAbility_Dodge::InternalEndAbility);
 	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_Dodge::InternalCancelAbility);
 	MontageTask->ReadyForActivation();
+	if (UseRootMotion) return;
+	UCombatSystem_ApplyMotion::CreateApplyMotionTask(this,GetFName(), DodgeDirection,DodgeMoveSpeed)->ReadyForActivation();
+	
+}
+
+void UCombatAbility_Dodge::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
+{
+	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
 }
 
 FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontage()
 {
+	//TODO: When locking onto enemies is added you need to come back here
 	//if Locking onto the enemy
 	//return GetDodgeMontageFromLocking();
 	//else
-	return RotateToMoveInput()? GetDodgeMontage(ERelativeContext::InFront) : GetDodgeMontage(ERelativeContext::Behind);
+	return RotateToMoveInput()? GetDodgeMontageFromContext(ERelativeContext::InFront) : GetDodgeMontageFromContext(ERelativeContext::Behind);
 }
 
 FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontageFromLocking()
@@ -40,8 +51,9 @@ FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontageFromLocking()
 	const FVector ControllerForward = Avatar->GetActorForwardVector() *(MoveInput.X);
 	const FVector ControllerRight = Avatar->GetActorRightVector() * (MoveInput.Y);
 
-	const FVector RelativeMoveInput = Avatar->GetActorLocation()+ ControllerForward+ControllerRight;
-	
+	AssignDodgeDirection(ControllerForward+ControllerRight);
+	const FVector RelativeMoveInput = Avatar->GetActorLocation()+ControllerForward+ControllerRight;
+
 	const int32 RelativeContext = UEinarGameplayLibrary::GetRelativeContextFromVector(Avatar, RelativeMoveInput);
 	for (auto& DodgeMontage : DodgeMontages)
 	{
@@ -53,8 +65,10 @@ FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontageFromLocking()
 	return nullptr;
 }
 
-FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontage(ERelativeContext RelativeContext)
+FMontageWithSection* UCombatAbility_Dodge::GetDodgeMontageFromContext(const ERelativeContext RelativeContext)
 {
+	AssignDodgeDirection(RelativeContext);
+
 	for (FDodgeMontage& DodgeMontage : DodgeMontages)
 	{
 		if (UEinarGameplayLibrary::FlagPredicate(DodgeMontage.Direction,RelativeContext))
@@ -75,3 +89,19 @@ bool UCombatAbility_Dodge::RotateToMoveInput() const
 	return UEinarGameplayLibrary::RotateToMoveInput(CurrentActorInfo->AvatarActor.Get(),PlayerController->GetMoveInput(), PlayerController->GetControlRotation().Yaw);
 
 }
+
+void UCombatAbility_Dodge::AssignDodgeDirection(const FVector& Direction)
+{
+	DodgeDirection = Direction.GetSafeNormal();
+
+}
+
+void UCombatAbility_Dodge::AssignDodgeDirection(const ERelativeContext RelativeContext)
+{
+	const AActor* Avatar = CurrentActorInfo->AvatarActor.Get();
+	if (!Avatar)return;
+
+	DodgeDirection = RelativeContext == ERelativeContext::InFront? Avatar->GetActorForwardVector() : -Avatar->GetActorForwardVector();
+
+}
+

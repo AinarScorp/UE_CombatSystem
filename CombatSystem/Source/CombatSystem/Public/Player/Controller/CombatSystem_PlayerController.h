@@ -7,7 +7,7 @@
 #include "Input/CombatSystem_InputConfig.h"
 #include "CombatSystem_PlayerController.generated.h"
 
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
@@ -38,7 +38,7 @@ private:
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	
-	UCombatSystem_AbilityComponent* GetCombatASC();
+	UCombatSystemComponent* GetCSC();
 
 public:
 	friend class ACombatSystem_PlayerCharacter;
@@ -51,7 +51,7 @@ private:
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	
 	UPROPERTY()
-	TObjectPtr<UCombatSystem_AbilityComponent> CachedCombatAbilitySystemComponent;
+	TObjectPtr<UCombatSystemComponent> CachedCombatSystemComponent;
 	
 	FVector2D MoveInput;
 

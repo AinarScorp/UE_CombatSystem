@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 
 #include "GameplayTagContainer.h"
 #include "CombatSystem/Abilities/CombatAbility.h"
@@ -9,7 +9,7 @@
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 #include "Interfaces/CombatSystem_AbilityInterface.h"
 
-void UCombatSystem_AbilityComponent::OnRegister()
+void UCombatSystemComponent::OnRegister()
 {
 	Super::OnRegister();
 	if (!CombatAbilityActorInfo.IsValid())
@@ -19,7 +19,7 @@ void UCombatSystem_AbilityComponent::OnRegister()
 }
 
 
-void UCombatSystem_AbilityComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
+void UCombatSystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 
@@ -32,7 +32,7 @@ void UCombatSystem_AbilityComponent::AbilityInputTagPressed(const FGameplayTag& 
 	}
 }
 
-void UCombatSystem_AbilityComponent::AbilityInputTagPressedWithValue(const FInputActionValue& InputActionValue, const FGameplayTag& InputTag)
+void UCombatSystemComponent::AbilityInputTagPressedWithValue(const FInputActionValue& InputActionValue, const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 
@@ -47,7 +47,7 @@ void UCombatSystem_AbilityComponent::AbilityInputTagPressedWithValue(const FInpu
 	}
 }
 
-void UCombatSystem_AbilityComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
+void UCombatSystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 
@@ -60,7 +60,7 @@ void UCombatSystem_AbilityComponent::AbilityInputTagReleased(const FGameplayTag&
 	}
 }
 
-void UCombatSystem_AbilityComponent::AbilityInputTagReleasedWithValue(const FInputActionValue& InputActionValue, const FGameplayTag& InputTag)
+void UCombatSystemComponent::AbilityInputTagReleasedWithValue(const FInputActionValue& InputActionValue, const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid()) return;
 
@@ -76,7 +76,7 @@ void UCombatSystem_AbilityComponent::AbilityInputTagReleasedWithValue(const FInp
 }
 
 
-void UCombatSystem_AbilityComponent::ProcessAbilityInput(float DeltaTime, bool bGamePaused)
+void UCombatSystemComponent::ProcessAbilityInput(float DeltaTime, bool bGamePaused)
 {
 	static TArray<FCombatAbilitySpecHandle> AbilitiesToActivate;
 	AbilitiesToActivate.Reset();
@@ -136,17 +136,17 @@ void UCombatSystem_AbilityComponent::ProcessAbilityInput(float DeltaTime, bool b
 	InputReleasedSpecHandles.Reset();
 }
 
-void UCombatSystem_AbilityComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)
+void UCombatSystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)
 {
 	CombatAbilityActorInfo->InitFromActor(InOwnerActor, InAvatarActor, this);
 }
 
 
-float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbility, UAnimMontage* NewAnimMontage, float InPlayRate, FName StartSectionName, float StartTimeSeconds)
+float UCombatSystemComponent::PlayMontage(UCombatAbility* AnimatingAbility, UAnimMontage* NewAnimMontage, float InPlayRate, FName StartSectionName, float StartTimeSeconds)
 {
 	float Duration = -1.f;
 
-	UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->SkeletalMeshComponent->GetAnimInstance() : nullptr;
+	UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->AnimInstance.Get() : nullptr;
 
 	if (!AnimInstance || !NewAnimMontage) return Duration;
 
@@ -159,7 +159,6 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 	}
 	AnimMontageInfo.AnimMontage = NewAnimMontage;
 	AnimMontageInfo.AnimatingAbility = AnimatingAbility;
-	// Start at a given Section.
 	if (StartSectionName != NAME_None)
 	{
 		AnimInstance->Montage_JumpToSection(StartSectionName, NewAnimMontage);
@@ -168,7 +167,7 @@ float UCombatSystem_AbilityComponent::PlayMontage(UCombatAbility* AnimatingAbili
 	return Duration;
 }
 
-void UCombatSystem_AbilityComponent::CurrentMontageStop(float OverrideBlendOutTime)
+void UCombatSystemComponent::CurrentMontageStop(float OverrideBlendOutTime)
 {
 	UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->SkeletalMeshComponent->GetAnimInstance() : nullptr;
 	UAnimMontage* MontageToStop = AnimMontageInfo.AnimMontage;
@@ -179,7 +178,7 @@ void UCombatSystem_AbilityComponent::CurrentMontageStop(float OverrideBlendOutTi
 	}
 }
 
-void UCombatSystem_AbilityComponent::ClearAnimatingAbility(UCombatAbility* Ability)
+void UCombatSystemComponent::ClearAnimatingAbility(UCombatAbility* Ability)
 {
 	if (AnimMontageInfo.AnimatingAbility.Get() == Ability)
 	{
@@ -188,12 +187,12 @@ void UCombatSystem_AbilityComponent::ClearAnimatingAbility(UCombatAbility* Abili
 	}
 }
 
-UCombatAbility* UCombatSystem_AbilityComponent::GetAnimatingAbility() const
+UCombatAbility* UCombatSystemComponent::GetAnimatingAbility() const
 {
 	return AnimMontageInfo.AnimatingAbility.Get();
 }
 
-UAnimMontage* UCombatSystem_AbilityComponent::GetCurrentMontage() const
+UAnimMontage* UCombatSystemComponent::GetCurrentMontage() const
 {
 	const UAnimInstance* AnimInstance = CombatAbilityActorInfo.IsValid() ? CombatAbilityActorInfo->SkeletalMeshComponent->GetAnimInstance() : nullptr;
 	if (AnimMontageInfo.AnimMontage && AnimInstance && AnimInstance->Montage_IsActive(AnimMontageInfo.AnimMontage))
@@ -204,8 +203,14 @@ UAnimMontage* UCombatSystem_AbilityComponent::GetCurrentMontage() const
 	return nullptr;
 }
 
+void UCombatSystemComponent::OnGameplayTaskActivated(UGameplayTask& Task)
+{
+	Super::OnGameplayTaskActivated(Task);
 
-void UCombatSystem_AbilityComponent::RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec)
+}
+
+
+void UCombatSystemComponent::RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec)
 {
 	for (const FCombatAbilityTriggerData& TriggerData : AbilitySpec.Ability->AbilityTriggers)
 	{
@@ -227,7 +232,7 @@ void UCombatSystem_AbilityComponent::RegisterTriggerableAbilities(const FCombatA
 	}
 }
 
-void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UCombatAbility* RequestingAbility, bool bEnableBlockTags,const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags)
+void UCombatSystemComponent::ApplyAbilityBlockAndCancelTags(const FGameplayTagContainer& AbilityTags, UCombatAbility* RequestingAbility, bool bEnableBlockTags,const FGameplayTagContainer& BlockTags, bool bExecuteCancelTags, const FGameplayTagContainer& CancelTags)
 {
 	//TODO: Check what happens if one thing removes tags, but there should be another one with the same
 	if (bEnableBlockTags)
@@ -245,7 +250,7 @@ void UCombatSystem_AbilityComponent::ApplyAbilityBlockAndCancelTags(const FGamep
 	}
 }
 
-void UCombatSystem_AbilityComponent::ApplyAbilityContainedTags(const FGameplayTagContainer& AbilityTags, bool bRemove)
+void UCombatSystemComponent::ApplyAbilityContainedTags(const FGameplayTagContainer& AbilityTags, bool bRemove)
 {
 	if (bRemove)
 	{
@@ -257,7 +262,7 @@ void UCombatSystem_AbilityComponent::ApplyAbilityContainedTags(const FGameplayTa
 	}
 }
 
-void UCombatSystem_AbilityComponent::CancelAbilities(const FGameplayTagContainer* WithTags, const FGameplayTagContainer* WithoutTags, UCombatAbility* Ignore)
+void UCombatSystemComponent::CancelAbilities(const FGameplayTagContainer* WithTags, const FGameplayTagContainer* WithoutTags, UCombatAbility* Ignore)
 {
 	for (FCombatAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
@@ -276,7 +281,7 @@ void UCombatSystem_AbilityComponent::CancelAbilities(const FGameplayTagContainer
 	}
 }
 
-void UCombatSystem_AbilityComponent::CancelAbilitySpec(FCombatAbilitySpec& Spec, UCombatAbility* Ignore)
+void UCombatSystemComponent::CancelAbilitySpec(FCombatAbilitySpec& Spec, UCombatAbility* Ignore)
 {
 	FCombatAbilityActorInfo* ActorInfo = CombatAbilityActorInfo.Get();
 	UCombatAbility* AbilityToCancel = Spec.InstancedAbility.Get();
@@ -286,7 +291,7 @@ void UCombatSystem_AbilityComponent::CancelAbilitySpec(FCombatAbilitySpec& Spec,
 	}
 }
 
-FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromHandle(FCombatAbilitySpecHandle Handle)
+FCombatAbilitySpec* UCombatSystemComponent::FindAbilitySpecFromHandle(FCombatAbilitySpecHandle Handle)
 {
 	for (FCombatAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
@@ -296,7 +301,7 @@ FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromHandle(FC
 	return nullptr;
 }
 
-FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromClass(const TSubclassOf<UCombatAbility> InAbilityClass)
+FCombatAbilitySpec* UCombatSystemComponent::FindAbilitySpecFromClass(const TSubclassOf<UCombatAbility> InAbilityClass)
 {
 	for (FCombatAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
@@ -309,7 +314,7 @@ FCombatAbilitySpec* UCombatSystem_AbilityComponent::FindAbilitySpecFromClass(con
 	return nullptr;
 }
 
-void UCombatSystem_AbilityComponent::GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities,
+void UCombatSystemComponent::GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities,
                                                                                  bool bOnlyAbilitiesThatSatisfyTagRequirements) const
 {
 	if (!GameplayTagContainer.IsValid())
@@ -329,17 +334,17 @@ void UCombatSystem_AbilityComponent::GetActivatableAbilitySpecsByAllMatchingTags
 	}
 }
 
-bool UCombatSystem_AbilityComponent::AreAbilityTagsBlocked(const FGameplayTagContainer& Tags) const
+bool UCombatSystemComponent::AreAbilityTagsBlocked(const FGameplayTagContainer& Tags) const
 {
 	return Tags.HasAny(BlockedTags.GetTags());
 }
 
-bool UCombatSystem_AbilityComponent::ContainsAbilityTags(const FGameplayTagContainer& Tags) const
+bool UCombatSystemComponent::ContainsAbilityTags(const FGameplayTagContainer& Tags) const
 {
 	return Tags.HasAny(ContainedTags.GetTags());
 }
 
-bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
+bool UCombatSystemComponent::TryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, bool bAllowRemoteActivation)
 {
 	FCombatAbilitySpec* Spec = FindAbilitySpecFromHandle(AbilityToActivate);
 	if (!Spec) return false;
@@ -355,7 +360,7 @@ bool UCombatSystem_AbilityComponent::TryActivateAbility(FCombatAbilitySpecHandle
 	
 }
 
-bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByTag(const FGameplayTagContainer& GameplayTagContainer, bool bAllowRemoteActivation)
+bool UCombatSystemComponent::TryActivateAbilitiesByTag(const FGameplayTagContainer& GameplayTagContainer, bool bAllowRemoteActivation)
 {
 	TArray<FCombatAbilitySpec*> AbilitiesToActivate;
 	GetActivatableAbilitySpecsByAllMatchingTags(GameplayTagContainer, AbilitiesToActivate);
@@ -369,7 +374,7 @@ bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByTag(const FGameplayTa
 	return bSuccess;
 }
 
-bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByClass(TSubclassOf<UCombatAbility> InAbilityToActivate, bool bAllowRemoteActivation)
+bool UCombatSystemComponent::TryActivateAbilitiesByClass(TSubclassOf<UCombatAbility> InAbilityToActivate, bool bAllowRemoteActivation)
 {
 	bool bSuccess = false;
 
@@ -387,7 +392,7 @@ bool UCombatSystem_AbilityComponent::TryActivateAbilitiesByClass(TSubclassOf<UCo
 	return bSuccess;
 }
 
-bool UCombatSystem_AbilityComponent::TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload,UCombatSystem_AbilityComponent& Component)
+bool UCombatSystemComponent::TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload,UCombatSystemComponent& Component)
 {
 	FCombatAbilitySpec* Spec = FindAbilitySpecFromHandle(AbilityToTrigger);
 
@@ -406,7 +411,7 @@ bool UCombatSystem_AbilityComponent::TriggerAbilityFromGameplayEvent(FCombatAbil
 }
 
 
-bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySpecHandle Handle, const FCombatEventData* TriggerEventData)
+bool UCombatSystemComponent::InternalTryActivateAbility(FCombatAbilitySpecHandle Handle, const FCombatEventData* TriggerEventData)
 {
 	if (Handle.IsValid() == false)
 	{
@@ -436,9 +441,9 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 	if (TriggerEventData != nullptr && TriggerEventData->Target)
 	{
 		const ICombatSystem_AbilityInterface* TargetAbilityInterface = Cast<ICombatSystem_AbilityInterface>(TriggerEventData->Target);
-		if (TargetAbilityInterface && TargetAbilityInterface->GetCombatAbilitySystemComponent())
+		if (TargetAbilityInterface && TargetAbilityInterface->GetCombatSystemComponent())
 		{
-			const FGameplayTagContainer TargetContainedTags = TargetAbilityInterface->GetCombatAbilitySystemComponent()->GetContainedAbilityTags();
+			const FGameplayTagContainer TargetContainedTags = TargetAbilityInterface->GetCombatSystemComponent()->GetContainedAbilityTags();
 			TargetTags = &TargetContainedTags;
 		}
 	}
@@ -465,7 +470,7 @@ bool UCombatSystem_AbilityComponent::InternalTryActivateAbility(FCombatAbilitySp
 	return true;
 }
 
-FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility(const FCombatAbilitySpec& AbilitySpec)
+FCombatAbilitySpecHandle UCombatSystemComponent::GiveAbility(const FCombatAbilitySpec& AbilitySpec)
 {
 	if (!AbilitySpec.Ability)
 	{
@@ -482,7 +487,7 @@ FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility(const FComb
 	return OwnedSpec.Handle;
 }
 
-FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility_BP(TSubclassOf<UCombatAbility> AbilityClass)
+FCombatAbilitySpecHandle UCombatSystemComponent::GiveAbility_BP(TSubclassOf<UCombatAbility> AbilityClass)
 {
 	const FCombatAbilitySpec AbilitySpec = FCombatAbilitySpec(AbilityClass);
 	if (!IsValid(AbilitySpec.Ability))
@@ -494,7 +499,7 @@ FCombatAbilitySpecHandle UCombatSystem_AbilityComponent::GiveAbility_BP(TSubclas
 
 
 
-void UCombatSystem_AbilityComponent::AbilitySpecInputPressed(FCombatAbilitySpec& Spec) const
+void UCombatSystemComponent::AbilitySpecInputPressed(FCombatAbilitySpec& Spec) const
 {
 	Spec.InputPressed = true;
 	if (Spec.IsActive())
@@ -503,7 +508,7 @@ void UCombatSystem_AbilityComponent::AbilitySpecInputPressed(FCombatAbilitySpec&
 	}
 }
 
-void UCombatSystem_AbilityComponent::AbilitySpecInputReleased(FCombatAbilitySpec& Spec) const
+void UCombatSystemComponent::AbilitySpecInputReleased(FCombatAbilitySpec& Spec) const
 {
 	Spec.InputPressed = false;
 	if (Spec.IsActive())
@@ -513,7 +518,7 @@ void UCombatSystem_AbilityComponent::AbilitySpecInputReleased(FCombatAbilitySpec
 }
 
 //TODO: Decide what to do with the commented out code
-int32 UCombatSystem_AbilityComponent::HandleGameplayEvent(FGameplayTag EventTag, const FCombatEventData* Payload)
+int32 UCombatSystemComponent::HandleGameplayEvent(FGameplayTag EventTag, const FCombatEventData* Payload)
 {
 	int32 TriggeredCount = 0;
 	FGameplayTag CurrentTag = EventTag;
@@ -553,7 +558,7 @@ int32 UCombatSystem_AbilityComponent::HandleGameplayEvent(FGameplayTag EventTag,
 	return TriggeredCount;
 }
 
-void UCombatSystem_AbilityComponent::NotifyAbilityEnded(FCombatAbilitySpecHandle Handle, UCombatAbility* Ability, bool bWasCancelled)
+void UCombatSystemComponent::NotifyAbilityEnded(FCombatAbilitySpecHandle Handle, UCombatAbility* Ability, bool bWasCancelled)
 {
 	if (AnimMontageInfo.AnimatingAbility.Get() == Ability)
 	{

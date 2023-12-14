@@ -6,6 +6,7 @@
 #include "CombatSystem_AttackTrace.h"
 #include "CombatSystem_AttackBoxTrace.generated.h"
 
+class UCombatAbility;
 /**
  * 
  */
@@ -16,7 +17,7 @@ class COMBATSYSTEM_API UCombatSystem_AttackBoxTrace : public UCombatSystem_Attac
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability", meta = (DefaultToSelf = "OwningActor"))
-	static UCombatSystem_AttackBoxTrace* AttackBoxTrace(AActor* OwningActor, USkeletalMeshComponent* SkeletalMeshComponent,FName WeaponCenterSocketName,FVector HalfSize,FRotator RotationOffset ,ETraceTypeQuery TraceChannel, TArray<AActor*> InActorsToIgnore);
+	static UCombatSystem_AttackBoxTrace* AttackBoxTrace(UCombatAbility* OwningAbility,USkeletalMeshComponent* SkeletalMeshComponent,FName WeaponCenterSocketName,FVector HalfSize,FRotator RotationOffset ,ETraceTypeQuery TraceChannel, TArray<AActor*> InActorsToIgnore);
 	virtual void TickTask(float DeltaTime) override;
 	
 private:

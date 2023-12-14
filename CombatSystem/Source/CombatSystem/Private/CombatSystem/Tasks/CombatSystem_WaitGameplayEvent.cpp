@@ -4,18 +4,15 @@
 #include "CombatSystem/Tasks/CombatSystem_WaitGameplayEvent.h"
 
 #include "GameplayTagContainer.h"
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "CombatSystem/Abilities/CombatAbility.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "Interfaces/CombatSystem_AbilityInterface.h"
 
-UCombatSystem_WaitGameplayEvent* UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(AActor* TargetActor, FGameplayTag EventTag, bool OnlyTriggerOnce, bool OnlyMatchExact)
+UCombatSystem_WaitGameplayEvent* UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(UCombatAbility* OwningAbility, FGameplayTag EventTag, bool OnlyTriggerOnce, bool OnlyMatchExact)
 {
-	UCombatSystem_WaitGameplayEvent* MyObj = NewTask<UCombatSystem_WaitGameplayEvent>(TargetActor, "WaitGameplayEvent");
-
-	const ICombatSystem_AbilityInterface* CombatAbilityInterface = Cast<ICombatSystem_AbilityInterface>(TargetActor);
-	if (CombatAbilityInterface)
-	{
-		MyObj->CombatSystemComponent = CombatAbilityInterface->GetCombatAbilitySystemComponent();
-	}
+	UCombatSystem_WaitGameplayEvent* MyObj = NewTask<UCombatSystem_WaitGameplayEvent>(OwningAbility, OwningAbility->GetFName());
+	
+	MyObj->CombatSystemComponent = OwningAbility->GetCurrentActorInfo()->CombatSystemComponent.Get();
 	MyObj->Tag = EventTag;
 	MyObj->OnlyTriggerOnce = OnlyTriggerOnce;
 	MyObj->OnlyMatchExact = OnlyMatchExact;
@@ -24,7 +21,7 @@ UCombatSystem_WaitGameplayEvent* UCombatSystem_WaitGameplayEvent::WaitGameplayEv
 
 void UCombatSystem_WaitGameplayEvent::Activate()
 {
-	UCombatSystem_AbilityComponent* CSC = CombatSystemComponent.Get();
+	UCombatSystemComponent* CSC = CombatSystemComponent.Get();
 	if (CSC)
 	{
 		if (OnlyMatchExact)
@@ -36,12 +33,11 @@ void UCombatSystem_WaitGameplayEvent::Activate()
 			//MyHandle = CSC->AddGameplayEventTagContainerDelegate(FGameplayTagContainer(Tag), FGameplayEventTagMulticastDelegate::FDelegate::CreateUObject(this, &UAbilityAsync_WaitGameplayEvent::GameplayEventContainerCallback));
 		}
 	}
-	Super::Activate();
 }
 
 void UCombatSystem_WaitGameplayEvent::EndAction()
 {
-	UCombatSystem_AbilityComponent* CSC = CombatSystemComponent.Get();
+	UCombatSystemComponent* CSC = CombatSystemComponent.Get();
 	if (CSC && MyHandle.IsValid())
 	{
 		if (OnlyMatchExact)

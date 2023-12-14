@@ -14,7 +14,7 @@ void UCombatAbility_Hit::ActivateAbility(const FCombatAbilitySpecHandle Handle, 
 	}
 	Super::ActivateAbility(Handle, ActorInfo, TriggerEventData);
 	const FHitMontageWithSection MontageWithSection = GetSectionNameFromContext(TriggerEventData);
-	ActorInfo->CombatAbilitySystemComponent->PlayMontage(this,MontageWithSection.HitMontage,1,MontageWithSection.SectionName);
+	ActorInfo->CombatSystemComponent->PlayMontage(this,MontageWithSection.HitMontage,1,MontageWithSection.SectionName);
 	EndAbility(Handle,ActorInfo,false);
 }
 

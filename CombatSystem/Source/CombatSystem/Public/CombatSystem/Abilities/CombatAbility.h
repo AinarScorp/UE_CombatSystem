@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
-#include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "CombatAbility.generated.h"
 
 
@@ -49,76 +48,75 @@ DECLARE_MULTICAST_DELEGATE(FOnCombatAbilityCancelled);
  */
 //TODO: Add on remove ability
 UCLASS(Abstract, Blueprintable, BlueprintType)
-class COMBATSYSTEM_API UCombatAbility : public UObject
+class COMBATSYSTEM_API UCombatAbility : public UObject, public IGameplayTaskOwnerInterface
 {
 	GENERATED_BODY()
-	friend class UCombatSystem_AbilityComponent;
+	friend class UCombatSystemComponent;
 public:
 	UCombatAbility(const FObjectInitializer& ObjectInitializer);
 public:
-	/** Returns true if this ability can be activated right now. Has no side effects */
-	virtual bool CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr) const;
-	/** Returns true if none of the ability's tags are blocked and if it doesn't have a "Blocking" tag and has all "Required" tags. */
-	virtual bool DoesAbilitySatisfyTagRequirements(const UCombatSystem_AbilityComponent& CombatAbilitySystemComponent, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr) const;
 
-	/** Checks cooldown. returns true if we can be used again. False if not */
-	virtual bool CheckCooldown(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const;
-	/** Checks cost. returns true if we can pay for the ability. False if not */
-	virtual bool CheckCost(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const;
+	// **IGameplayTaskOwnerInterface
+	virtual UGameplayTasksComponent* GetGameplayTasksComponent(const UGameplayTask& Task) const override;
+	virtual AActor* GetGameplayTaskAvatar(const UGameplayTask* Task) const override;
+	virtual AActor* GetGameplayTaskOwner(const UGameplayTask* Task) const override;
+	virtual void OnGameplayTaskActivated(UGameplayTask& Task) override;
+	virtual void OnGameplayTaskDeactivated(UGameplayTask& Task) override;
+	
+	virtual void OnGiveAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo);
 	virtual void ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData = nullptr);
 	virtual void EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled);
 	virtual void CancelAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo);
-
-	virtual void OnGiveAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo);
-	/** Input binding stub. */
+	
+	virtual bool CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr) const;
+	virtual bool DoesAbilitySatisfyTagRequirements(const UCombatSystemComponent& CombatAbilitySystemComponent, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr) const;
+	
 	virtual void InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo);
-	/** Input binding stub. */
 	virtual void InputReleased(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo);
+	
+	const FCombatAbilityActorInfo* GetCurrentActorInfo() const { return CurrentActorInfo; };
 
+	//**Blueprint Implementable Functions
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "ActivateAbility")
 	void BP_ActivateAbility();
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "CanActivateAbility")
 	bool BP_CanActivateAbility(FCombatAbilityActorInfo ActorInfo) const;
-	bool bHasBlueprintCanUse;
-	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnEndAbility")
 	void BP_OnEndAbility(bool bWasCancelled);
-	UFUNCTION(BlueprintCallable, DisplayName = "EndAbility")
-	void BP_EndAbility();
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnInputPressed")
 	void BP_OnInputPressed();
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnInputReleased")
 	void BP_OnInputReleased();
-
+	
+	//**Blueprint Callable Functions
+	UFUNCTION(BlueprintCallable, DisplayName = "EndAbility")
+	void BP_EndAbility();
+	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
+	FCombatAbilityActorInfo GetActorInfo() const { return *CurrentActorInfo; }
+	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
+	FCombatEventData GetCombatEventData() const { return CombatEventData; }
+	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability")
+	FGameplayTagContainer GetAbilityTags() const { return AbilityTags; };
+	
+	//Animation Related Functions
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	UAnimMontage* GetCurrentMontage() const;
 	virtual void SetCurrentMontage(class UAnimMontage* InCurrentMontage);
 
-	/** Returns the actor info associated with this ability, has cached pointers to useful objects */
-	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
-	FCombatAbilityActorInfo GetActorInfo() const { return *CurrentActorInfo; };
-	UFUNCTION(BlueprintCallable, Category="CombatSystem|Ability")
-	FCombatEventData GetCombatEventData() const { return CombatEventData; };
-	const FCombatAbilityActorInfo* GetCurrentActorInfo() const { return CurrentActorInfo; };
-	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability")
-	FGameplayTagContainer GetAbilityTags() const { return AbilityTags; };
 protected:
 	UFUNCTION()
 	virtual void InternalEndAbility();
 	UFUNCTION()
 	virtual void InternalCancelAbility();
-	// template<class UserClass,class FuncName>
-	// UCombatSystem_PlayMontage* StartMontageTask(UserClass* Object, UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction = nullptr,FuncName OnInterruptedFunc = nullptr);
 
 public:
+	//**Delegates
 	FOnCombatAbilityCancelled OnCombatAbilityCancelled;
 
-	
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer AbilityTags;
 	UPROPERTY(EditDefaultsOnly, Category = Tags, meta=(Categories="AbilityTagCategory"))
 	FGameplayTagContainer BlockAbilitiesWithTag;
-	/** Abilities with these tags are cancelled when this ability is executed */
 	UPROPERTY(EditDefaultsOnly, Category = Tags, meta=(Categories="AbilityTagCategory"))
 	FGameplayTagContainer CancelAbilitiesWithTag;
 	/** This ability is blocked if the source actor/component has any of these tags */
@@ -127,28 +125,34 @@ public:
 	/** This ability is blocked if the target actor/component has any of these tags */
 	UPROPERTY(EditDefaultsOnly, Category = Tags, meta=(Categories="TargetTagsCategory"))
 	FGameplayTagContainer TargetBlockedTags;
-	
 	UPROPERTY(EditDefaultsOnly, Category = Tags)
 	FGameplayTagContainer OnGiveAbilityGrandTags;
 
-	
-
 protected:
-	mutable const FCombatAbilityActorInfo* CurrentActorInfo;
-	mutable FCombatAbilitySpecHandle CurrentSpecHandle;
-	FCombatEventData CombatEventData;
-
-	UPROPERTY(EditDefaultsOnly, Category = Triggers)
+	UPROPERTY(EditDefaultsOnly, Category = "CombatSystem|Ability|Triggers")
 	TArray<FCombatAbilityTriggerData> AbilityTriggers;
-	UPROPERTY(EditDefaultsOnly, Category = Advanced)
+	UPROPERTY(EditDefaultsOnly, Category = "CombatSystem|Ability|Advanced", meta = (cate))
 	bool bRetriggerInstancedAbility;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="CombatSystem|Ability")
 	bool bIsCancelable = true;
 	UPROPERTY()
 	bool bIsActive;
 	UPROPERTY()
-	TObjectPtr<class UAnimMontage> CurrentMontage;
+	TObjectPtr<UAnimMontage> CurrentMontage;
+	UPROPERTY()
+	TArray<TObjectPtr<UGameplayTask>> ActiveTasks;
+	
+	mutable const FCombatAbilityActorInfo* CurrentActorInfo;
+	mutable FCombatAbilitySpecHandle CurrentSpecHandle;
+	FCombatEventData CombatEventData;
+private:
+	bool bCanActivateAbilityImplementedInBP;
 };
+
+
+// template<class UserClass,class FuncName>
+// UCombatSystem_PlayMontage* StartMontageTask(UserClass* Object, UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction = nullptr,FuncName OnInterruptedFunc = nullptr);
+
 // template <class UserClass, typename FuncName>
 // UCombatSystem_PlayMontage* UCombatAbility::StartMontageTask(UserClass* Object,UAnimMontage* MontageToPlay, FName StartSection, FuncName OnCompletedFunction, FuncName OnInterruptedFunc)
 // {

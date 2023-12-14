@@ -3,15 +3,17 @@
 
 #include "CombatSystem/Tasks/CombatSystem_AttackSphereTrace.h"
 
+#include "CombatSystem/Abilities/CombatAbility.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
 
 
-UCombatSystem_AttackSphereTrace* UCombatSystem_AttackSphereTrace::AttackSphereTrace(AActor* OwningActor, USkeletalMeshComponent* SkeletalMeshComponent, const FName WeaponCenterSocketName, const float Radius, const ETraceTypeQuery TraceChannel, const TArray<AActor*> InActorsToIgnore)
+UCombatSystem_AttackSphereTrace* UCombatSystem_AttackSphereTrace::AttackSphereTrace(UCombatAbility* OwningAbility,USkeletalMeshComponent* SkeletalMeshComponent, const FName WeaponCenterSocketName, const float Radius, const ETraceTypeQuery TraceChannel, const TArray<AActor*> InActorsToIgnore)
 {
-	UCombatSystem_AttackSphereTrace* MyObj = NewTask<UCombatSystem_AttackSphereTrace>(OwningActor, "AttackSphereTrace");
-	MyObj->OwningActor = OwningActor;
+	UCombatSystem_AttackSphereTrace* MyObj = NewTask<UCombatSystem_AttackSphereTrace>(OwningAbility, "AttackSphereTrace");
+	
+	MyObj->OwningAbility = OwningAbility;
 	MyObj->SkeletalMesh = SkeletalMeshComponent;
 	MyObj->WeaponCenterSocketName = WeaponCenterSocketName;
 	MyObj->Radius = Radius;
@@ -22,13 +24,13 @@ UCombatSystem_AttackSphereTrace* UCombatSystem_AttackSphereTrace::AttackSphereTr
 
 void UCombatSystem_AttackSphereTrace::TickTask(float DeltaTime)
 {
-	EndTraceLocation = SkeletalMesh.Get()->GetSocketLocation(WeaponCenterSocketName);
+	EndTraceLocation = SkeletalMesh->GetSocketLocation(WeaponCenterSocketName);
 	TArray<FHitResult> HitResults;
-	UKismetSystemLibrary::SphereTraceMulti(OwningActor.Get(),StartTraceLocation,EndTraceLocation,Radius,TraceChannel, false, ActorsToIgnore,DebugInfo.DrawDebugTraceType,HitResults, true, DebugInfo.TraceColor,DebugInfo.TraceHitColor,DebugInfo.DrawTime);
+	UKismetSystemLibrary::SphereTraceMulti(SkeletalMesh.Get(),StartTraceLocation,EndTraceLocation,Radius,TraceChannel, false, ActorsToIgnore,DebugInfo.DrawDebugTraceType,HitResults, true, DebugInfo.TraceColor,DebugInfo.TraceHitColor,DebugInfo.DrawTime);
 	for (auto HitResult : HitResults)
 	{
 		ActorsToIgnore.Add(HitResult.GetActor());
-		OnHitTarget.Broadcast(OwningActor.Get(), HitResult);
+		OnHitTarget.Broadcast(OwningAbility->GetCurrentActorInfo()->AvatarActor.Get(), HitResult);
 	}
 	StartTraceLocation = EndTraceLocation;
 }

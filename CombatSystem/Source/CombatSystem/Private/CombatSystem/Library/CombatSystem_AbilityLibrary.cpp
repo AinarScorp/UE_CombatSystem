@@ -3,20 +3,20 @@
 
 #include "CombatSystem/Library/CombatSystem_AbilityLibrary.h"
 
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "Interfaces/CombatSystem_AbilityInterface.h"
 
-UCombatSystem_AbilityComponent* UCombatSystem_AbilityLibrary::GetCombatSystemComponent(AActor* Actor)
+UCombatSystemComponent* UCombatSystem_AbilityLibrary::GetCombatSystemComponent(AActor* Actor)
 {
 	const ICombatSystem_AbilityInterface* CombatAbilityInterface = Cast<ICombatSystem_AbilityInterface>(Actor);
-	return CombatAbilityInterface? CombatAbilityInterface->GetCombatAbilitySystemComponent() : nullptr;
+	return CombatAbilityInterface? CombatAbilityInterface->GetCombatSystemComponent() : nullptr;
 }
 
 void UCombatSystem_AbilityLibrary::SendGameplayEventToActor(AActor* Actor, FGameplayTag EventTag, FCombatEventData Payload)
 {
 	if (IsValid(Actor))
 	{
-		UCombatSystem_AbilityComponent* CombatSystemComponent = GetCombatSystemComponent(Actor);
+		UCombatSystemComponent* CombatSystemComponent = GetCombatSystemComponent(Actor);
 		if (CombatSystemComponent)
 		{
 			CombatSystemComponent->HandleGameplayEvent(EventTag, &Payload);

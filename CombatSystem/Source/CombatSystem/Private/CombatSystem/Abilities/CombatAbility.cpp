@@ -5,7 +5,7 @@
 
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 #include "CombatSystem/Structs/CombatAbilitySpecHandle.h"
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 
 
 UCombatAbility::UCombatAbility(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -17,8 +17,34 @@ UCombatAbility::UCombatAbility(const FObjectInitializer& ObjectInitializer): Sup
 	};
 	static FName FuncName = FName(TEXT("BP_CanActivateAbility"));
 	UFunction* CanActivateFunction = GetClass()->FindFunctionByName(FuncName);
-	bHasBlueprintCanUse = ImplementedInBlueprint(CanActivateFunction);
+	bCanActivateAbilityImplementedInBP = ImplementedInBlueprint(CanActivateFunction);
 }
+
+UGameplayTasksComponent* UCombatAbility::GetGameplayTasksComponent(const UGameplayTask& Task) const
+{
+	return GetCurrentActorInfo() ? GetCurrentActorInfo()->CombatSystemComponent.Get() : nullptr;
+}
+
+AActor* UCombatAbility::GetGameplayTaskAvatar(const UGameplayTask* Task) const
+{
+	return GetCurrentActorInfo()->AvatarActor.Get();
+}
+
+AActor* UCombatAbility::GetGameplayTaskOwner(const UGameplayTask* Task) const
+{
+	return GetCurrentActorInfo()->OwnerActor.Get();
+}
+
+void UCombatAbility::OnGameplayTaskActivated(UGameplayTask& Task)
+{
+	ActiveTasks.Add(&Task);
+}
+
+void UCombatAbility::OnGameplayTaskDeactivated(UGameplayTask& Task)
+{
+	ActiveTasks.Remove(&Task);
+}
+
 
 bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
 {
@@ -33,7 +59,7 @@ bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, c
 
 
 	// make sure the ability system component is valid, if not bail out.
-	UCombatSystem_AbilityComponent* const AbilitySystemComponent = ActorInfo->CombatAbilitySystemComponent.Get();
+	UCombatSystemComponent* const AbilitySystemComponent = ActorInfo->CombatSystemComponent.Get();
 	if (!AbilitySystemComponent)
 	{
 		return false;
@@ -43,123 +69,46 @@ bool UCombatAbility::CanActivateAbility(const FCombatAbilitySpecHandle Handle, c
 		return false;
 	}
 
-	if (bHasBlueprintCanUse)
+	if (bCanActivateAbilityImplementedInBP)
 	{
-		UE_LOG(LogTemp,Display, TEXT("%s I am in blueprints"), *GetName())
+		UE_LOG(LogTemp, Display, TEXT("%s I am in blueprints"), *GetName())
 		return BP_CanActivateAbility(*ActorInfo);
 	}
 	return true;
 }
 
-bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystem_AbilityComponent& CombatAbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
+bool UCombatAbility::DoesAbilitySatisfyTagRequirements(const UCombatSystemComponent& CombatAbilitySystemComponent, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags) const
 {
-	// Check if any of this ability's tags are currently blocked
 	if (CombatAbilitySystemComponent.AreAbilityTagsBlocked(AbilityTags))
 	{
 		return false;
 	}
 
-	// // Check to see the required/blocked tags for this ability
-	// if (ActivationBlockedTags.Num() || ActivationRequiredTags.Num())
-	// {
-	// 	static FGameplayTagContainer AbilitySystemComponentTags;
-	// 	AbilitySystemComponentTags.Reset();
-	//
-	// 	AbilitySystemComponent.GetOwnedGameplayTags(AbilitySystemComponentTags);
-	//
-	// 	if (AbilitySystemComponentTags.HasAny(ActivationBlockedTags))
-	// 	{
-	// 		bBlocked = true;
-	// 	}
-	//
-	// 	if (!AbilitySystemComponentTags.HasAll(ActivationRequiredTags))
-	// 	{
-	// 		bMissing = true;
-	// 	}
-	// }
 	if (SourceTags != nullptr)
 	{
-		//if (SourceBlockedTags.Num() || SourceRequiredTags.Num())
 		if (SourceBlockedTags.Num())
 		{
 			if (SourceTags->HasAny(SourceBlockedTags))
 			{
 				return false;
 			}
-
-			// if (!SourceTags->HasAll(SourceRequiredTags))
-			// {
-			// 	return false;
-			// 	bMissing = true;
-			// }
 		}
 	}
 
 	if (TargetTags != nullptr)
 	{
-		//if (TargetBlockedTags.Num() || TargetRequiredTags.Num())
 		if (TargetBlockedTags.Num())
 		{
 			if (TargetTags->HasAny(TargetBlockedTags))
 			{
 				return false;
 			}
-			//
-			// if (!TargetTags->HasAll(TargetRequiredTags))
-			// {
-			// 	return false;
-			// }
 		}
 	}
 
 	return true;
 }
 
-bool UCombatAbility::CheckCooldown(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	// const FGameplayTagContainer* CooldownTags = GetCooldownTags();
-	// if (CooldownTags)
-	// {
-	// 	if (CooldownTags->Num() > 0)
-	// 	{
-	// 		UCombatSystem_AbilityComponent* const AbilitySystemComponent = ActorInfo->CombatAbilitySystemComponent.Get();
-	// 		check(AbilitySystemComponent != nullptr);
-	// 		if (AbilitySystemComponent->HasAnyMatchingGameplayTags(*CooldownTags))
-	// 		{
-	// 			const FGameplayTag& CooldownTag = UAbilitySystemGlobals::Get().ActivateFailCooldownTag;
-	//
-	// 			if (OptionalRelevantTags && CooldownTag.IsValid())
-	// 			{
-	// 				OptionalRelevantTags->AddTag(CooldownTag);
-	// 			}
-	//
-	// 			return false;
-	// 		}
-	// 	}
-	// }
-	return true;
-}
-
-bool UCombatAbility::CheckCost(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	// UGameplayEffect* CostGE = GetCostGameplayEffect();
-	// if (CostGE)
-	// {
-	// 	UAbilitySystemComponent* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-	// 	check(AbilitySystemComponent != nullptr);
-	// 	if (!AbilitySystemComponent->CanApplyAttributeModifiers(CostGE, GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo)))
-	// 	{
-	// 		const FGameplayTag& CostTag = UAbilitySystemGlobals::Get().ActivateFailCostTag;
-	//
-	// 		if (OptionalRelevantTags && CostTag.IsValid())
-	// 		{
-	// 			OptionalRelevantTags->AddTag(CostTag);
-	// 		}
-	// 		return false;
-	// 	}
-	// }
-	return true;
-}
 
 void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData)
 {
@@ -167,7 +116,7 @@ void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, cons
 	{
 		CombatEventData = *TriggerEventData;
 	}
-	UCombatSystem_AbilityComponent* Comp = ActorInfo->CombatAbilitySystemComponent.Get();
+	UCombatSystemComponent* Comp = ActorInfo->CombatSystemComponent.Get();
 	FCombatAbilitySpec* Spec = Comp->FindAbilitySpecFromHandle(Handle);
 
 	Comp->ApplyAbilityBlockAndCancelTags(AbilityTags, this, true, BlockAbilitiesWithTag, true, CancelAbilitiesWithTag);
@@ -179,14 +128,28 @@ void UCombatAbility::ActivateAbility(const FCombatAbilitySpecHandle Handle, cons
 
 void UCombatAbility::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
 {
-	UCombatSystem_AbilityComponent* Comp = ActorInfo->CombatAbilitySystemComponent.Get();
+	if (!bIsActive) return;
+
+	UCombatSystemComponent* Comp = ActorInfo->CombatSystemComponent.Get();
 	FCombatAbilitySpec* Spec = Comp->FindAbilitySpecFromHandle(Handle);
+
 	Comp->ApplyAbilityBlockAndCancelTags(AbilityTags, this, false, BlockAbilitiesWithTag, false, CancelAbilitiesWithTag);
 	Comp->ApplyAbilityContainedTags(OnGiveAbilityGrandTags, true);
+
 
 	Spec->ActiveCount--;
 	bIsActive = false;
 	Comp->NotifyAbilityEnded(Handle, this, bWasCancelled);
+	//Put this into a function
+	for (int32 TaskIdx = ActiveTasks.Num() - 1; TaskIdx >= 0 && ActiveTasks.Num() > 0; --TaskIdx)
+	{
+		UGameplayTask* Task = ActiveTasks[TaskIdx];
+		if (Task)
+		{
+			Task->TaskOwnerEnded();
+		}
+	}
+	ActiveTasks.Reset();
 	BP_OnEndAbility(bWasCancelled);
 }
 
@@ -216,7 +179,6 @@ void UCombatAbility::BP_EndAbility()
 UAnimMontage* UCombatAbility::GetCurrentMontage() const
 {
 	return CurrentMontage;
-
 }
 
 void UCombatAbility::SetCurrentMontage(UAnimMontage* InCurrentMontage)

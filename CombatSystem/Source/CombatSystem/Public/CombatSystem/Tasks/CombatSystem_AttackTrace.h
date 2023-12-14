@@ -8,6 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "CombatSystem_AttackTrace.generated.h"
 
+class UCombatAbility;
 /**
  * 
  */
@@ -26,7 +27,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHitTarget OnHitTarget;
 protected:
-	TWeakObjectPtr<AActor> OwningActor;
+	TObjectPtr<UCombatAbility> OwningAbility;
 	TWeakObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 	FName WeaponCenterSocketName;
 	FVector StartTraceLocation;

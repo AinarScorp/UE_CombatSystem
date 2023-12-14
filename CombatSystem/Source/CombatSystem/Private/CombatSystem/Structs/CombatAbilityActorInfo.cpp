@@ -3,11 +3,11 @@
 
 #include "CombatSystem/Structs/CombatAbilityActorInfo.h"
 
-void FCombatAbilityActorInfo::InitFromActor(AActor* InOwnerActor, AActor* InAvatarActor, UCombatSystem_AbilityComponent* InAbilitySystemComponent)
+void FCombatAbilityActorInfo::InitFromActor(AActor* InOwnerActor, AActor* InAvatarActor, UCombatSystemComponent* InAbilitySystemComponent)
 {
 	OwnerActor = InOwnerActor;
 	AvatarActor = InAvatarActor;
-	CombatAbilitySystemComponent = InAbilitySystemComponent;
+	CombatSystemComponent = InAbilitySystemComponent;
 	if (const AActor* AvatarActorPtr = AvatarActor.Get())
 	{
 		SkeletalMeshComponent = AvatarActorPtr->FindComponentByClass<USkeletalMeshComponent>();

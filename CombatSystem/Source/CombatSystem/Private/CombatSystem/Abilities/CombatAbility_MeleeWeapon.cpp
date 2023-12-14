@@ -22,12 +22,12 @@ void UCombatAbility_MeleeWeapon::ActivateAbility(const FCombatAbilitySpecHandle 
 	Super::ActivateAbility(Handle, ActorInfo, TriggerEventData);
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(ActorInfo->AvatarActor.Get());
-	AttackBoxTrace = UCombatSystem_AttackBoxTrace::AttackBoxTrace(ActorInfo->AvatarActor.Get(),Weapon->GetWeaponMesh(),WeaponCenterSocket,AttackBoxHalfSize,AttackRotationOffset,AttackChannel,ActorsToIgnore);
+	AttackBoxTrace = UCombatSystem_AttackBoxTrace::AttackBoxTrace(this,Weapon->GetWeaponMesh(),WeaponCenterSocket,AttackBoxHalfSize,AttackRotationOffset,AttackChannel,ActorsToIgnore);
 	AttackBoxTrace->SetupDebug(TraceDebugInfo);
 	AttackBoxTrace->OnHitTarget.AddDynamic(this,&UCombatAbility_MeleeWeapon::OnHitTarget);
 	AttackBoxTrace->ReadyForActivation();
 
-	UCombatSystem_WaitGameplayEvent* WaitTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),FCombatSystem_GameplayTags::Get().Weapon_FinishExecute,true);
+	UCombatSystem_WaitGameplayEvent* WaitTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(this,FCombatSystem_GameplayTags::Get().Weapon_FinishExecute,true);
 	WaitTask->EventReceived.AddDynamic(this, &UCombatAbility_MeleeWeapon::FinishExecute);
 	WaitTask->ReadyForActivation();
 }

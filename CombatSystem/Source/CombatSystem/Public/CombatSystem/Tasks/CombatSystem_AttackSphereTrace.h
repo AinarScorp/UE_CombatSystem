@@ -8,7 +8,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "CombatSystem_AttackSphereTrace.generated.h"
 
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 class USkeletalMeshComponent;
 /**
  * 
@@ -20,7 +20,7 @@ class COMBATSYSTEM_API UCombatSystem_AttackSphereTrace : public UCombatSystem_At
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability", meta = (DefaultToSelf = "OwningActor"))
-	static UCombatSystem_AttackSphereTrace* AttackSphereTrace(AActor* OwningActor, USkeletalMeshComponent* SkeletalMeshComponent,FName WeaponCenterSocketName,float Radius, ETraceTypeQuery TraceChannel, TArray<AActor*> InActorsToIgnore);
+	static UCombatSystem_AttackSphereTrace* AttackSphereTrace(UCombatAbility* OwningAbility,USkeletalMeshComponent* SkeletalMeshComponent,FName WeaponCenterSocketName,float Radius, ETraceTypeQuery TraceChannel, TArray<AActor*> InActorsToIgnore);
 	virtual void TickTask(float DeltaTime) override;
 
 private:

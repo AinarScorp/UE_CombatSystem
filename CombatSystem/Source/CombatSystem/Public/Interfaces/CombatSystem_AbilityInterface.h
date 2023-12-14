@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "CombatSystem_AbilityInterface.generated.h"
 
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UCombatSystem_AbilityInterface : public UInterface
@@ -20,5 +20,5 @@ class COMBATSYSTEM_API ICombatSystem_AbilityInterface
 	GENERATED_BODY()
 
 public:
-	virtual UCombatSystem_AbilityComponent* GetCombatAbilitySystemComponent()const =0;
+	virtual UCombatSystemComponent* GetCombatSystemComponent()const =0;
 };

@@ -9,14 +9,14 @@
 #include "CombatSystem/Structs/CombatAbilitySpecHandle.h"
 #include "CombatSystem/Structs/CombatEventData.h"
 #include "CombatSystem/Structs/CombatSystem_Helpers_Stucts.h"
-#include "CombatSystem_AbilityComponent.generated.h"
+#include "CombatSystemComponent.generated.h"
 
 
 class UInputAbility;
 struct FCombatAbilityActorInfo;
 class UCombatAbility;
 class UGameplayAbility;
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 struct FGameplayTag;
 
 
@@ -28,9 +28,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FGameplayEventMulticastDelegate, const FComb
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilityEnded, UCombatAbility*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityEnded_BP, UCombatAbility*, CombatAbility);
 
-//TODO: Rename to CombatAbilitySystemCoponent
 UCLASS()
-class COMBATSYSTEM_API UCombatSystem_AbilityComponent : public UGameplayTasksComponent
+class COMBATSYSTEM_API UCombatSystemComponent : public UGameplayTasksComponent
 {
 	GENERATED_BODY()
 public:
@@ -52,7 +51,7 @@ public:
 	bool TryActivateAbilitiesByTag(const FGameplayTagContainer& GameplayTagContainer, bool bAllowRemoteActivation = true);
 	UFUNCTION(BlueprintCallable, Category = "Abilities")
 	bool TryActivateAbilitiesByClass(TSubclassOf<UCombatAbility> InAbilityToActivate, bool bAllowRemoteActivation = true);
-	bool TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload, UCombatSystem_AbilityComponent& Component);
+	bool TriggerAbilityFromGameplayEvent(FCombatAbilitySpecHandle AbilityToTrigger, FCombatAbilityActorInfo* ActorInfo, FGameplayTag Tag, const FCombatEventData* Payload, UCombatSystemComponent& Component);
 
 	bool InternalTryActivateAbility(FCombatAbilitySpecHandle AbilityToActivate, const FCombatEventData* TriggerEventData = nullptr);
 	
@@ -80,6 +79,7 @@ public:
 
 	UCombatAbility* GetAnimatingAbility() const;
 	UAnimMontage* GetCurrentMontage() const;
+	virtual void OnGameplayTaskActivated(UGameplayTask& Task) override;
 
 private:
 	void RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec);

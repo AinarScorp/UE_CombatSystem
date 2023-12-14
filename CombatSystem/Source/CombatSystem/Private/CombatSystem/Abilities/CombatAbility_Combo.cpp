@@ -30,18 +30,19 @@ void UCombatAbility_Combo::InputPressed(const FCombatAbilitySpecHandle Handle, c
 
 void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
 {
-	if (WaitForInputWindowStartTask.IsValid())
-	{
-		WaitForInputWindowStartTask->ExternalCancel();
-	}
-	if (WaitForInputWindowEndTask.IsValid())
-	{
-		WaitForInputWindowEndTask->ExternalCancel();
-	}
-	if (MontageTask.IsValid())
-	{
-		MontageTask->ExternalCancel();
-	}
+
+	// if (WaitForInputWindowStartTask.IsValid())
+	// {
+	// 	WaitForInputWindowStartTask->ExternalCancel();
+	// }
+	// if (WaitForInputWindowEndTask.IsValid())
+	// {
+	// 	WaitForInputWindowEndTask->ExternalCancel();
+	// }
+	// if (MontageTask.IsValid())
+	// {
+	// 	MontageTask->ExternalCancel();
+	// }
 	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
 }
 
@@ -51,7 +52,11 @@ void UCombatAbility_Combo::StartNextAttack()
 	const FComboAnimInfo& ComboInfo = Combos[CurrentComboIndex];
 	CurrentComboIndex++;
 	RotateToMoveInput();
-	
+
+	if (MontageTask.Get())
+	{
+		MontageTask->OnInterrupted.RemoveDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);
+	}
 	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), ComboInfo.AnimMontage, 1, ComboInfo.AnimSection);
 	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
 	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);
@@ -64,7 +69,7 @@ void UCombatAbility_Combo::StartNewWaitTaskForInputWindowStart()
 	{
 		WaitForInputWindowStartTask->ExternalCancel();
 	}
-	WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),FCombatSystem_GameplayTags::Get().AttackInputWindow_Start,true);
+	WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(this,FCombatSystem_GameplayTags::Get().AttackInputWindow_Start,true);
 	WaitForInputWindowStartTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowStarted);
 	WaitForInputWindowStartTask->ReadyForActivation();
 }
@@ -75,7 +80,7 @@ void UCombatAbility_Combo::StartNewWaitTaskForInputWindowEnd()
 	{
 		WaitForInputWindowStartTask->EndTask();
 	}
-	WaitForInputWindowEndTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(), FCombatSystem_GameplayTags::Get().AttackInputWindow_End,true);
+	WaitForInputWindowEndTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(this, FCombatSystem_GameplayTags::Get().AttackInputWindow_End,true);
 	WaitForInputWindowEndTask->EventReceived.AddDynamic(this, &UCombatAbility_Combo::AttackInputWindowEnded);
 	WaitForInputWindowEndTask->ReadyForActivation();
 }

@@ -9,7 +9,7 @@
 
 struct FInputActionValue;
 class UCombatAbility;
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 
 USTRUCT(BlueprintType)
 struct FCombatAbilitySpec
@@ -85,7 +85,7 @@ struct FCombatAbilitySpecContainer
 
 	/** Component that owns this list */
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCombatSystem_AbilityComponent> Owner;
+	TObjectPtr<UCombatSystemComponent> Owner;
 
-	void RegisterWithOwner(UCombatSystem_AbilityComponent* InOwner);
+	void RegisterWithOwner(UCombatSystemComponent* InOwner);
 };

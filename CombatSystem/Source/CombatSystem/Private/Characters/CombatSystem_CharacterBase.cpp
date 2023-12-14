@@ -3,18 +3,18 @@
 
 #include "Characters/CombatSystem_CharacterBase.h"
 
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "Data/CombatSystem_CharacterStartupInfo.h"
 
 // Sets default values
 ACombatSystem_CharacterBase::ACombatSystem_CharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	CombatSystemComponent = CreateDefaultSubobject<UCombatSystem_AbilityComponent>("CombatSystemComponent");
+	CombatSystemComponent = CreateDefaultSubobject<UCombatSystemComponent>("CombatSystemComponent");
 }
 
 
-UCombatSystem_AbilityComponent* ACombatSystem_CharacterBase::GetCombatAbilitySystemComponent() const
+UCombatSystemComponent* ACombatSystem_CharacterBase::GetCombatSystemComponent() const
 {
 	return CombatSystemComponent;
 

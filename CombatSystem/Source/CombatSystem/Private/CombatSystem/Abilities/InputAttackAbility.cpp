@@ -10,7 +10,7 @@ void UInputAttackAbility::OnGiveAbility(const FCombatAbilitySpecHandle Handle, c
 	{
 		FCombatAbilitySpec AbilitySpec = FCombatAbilitySpec(Ability.Ability);
 		AbilitySpec.DynamicAbilityTags.AddTag(Ability.DynamicTag);
-		ActorInfo->CombatAbilitySystemComponent->GiveAbility(AbilitySpec);
+		ActorInfo->CombatSystemComponent->GiveAbility(AbilitySpec);
 	}
 }
 
@@ -19,6 +19,6 @@ void UInputAttackAbility::InputPressed(const FCombatAbilitySpecHandle Handle, co
 	Super::InputPressed(Handle, ActorInfo);
 
 
-	FCombatAbilitySpec* Spec = ActorInfo->CombatAbilitySystemComponent->FindAbilitySpecFromClass(ActiveAbility.Ability);
+	FCombatAbilitySpec* Spec = ActorInfo->CombatSystemComponent->FindAbilitySpecFromClass(ActiveAbility.Ability);
 	//Spec->InstancedAbility->InputPressed();
 }

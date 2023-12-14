@@ -5,7 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Characters/CombatSystem_PlayerCharacter.h"
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "Input/CombatSystem_InputComponent.h"
 #include "Tags/CombatSystem_GameplayTags.h"
 
@@ -23,8 +23,6 @@ void ACombatSystem_PlayerController::SetupInputComponent()
 	UCombatSystem_InputComponent* CombatSystemInputComponent = CastChecked<UCombatSystem_InputComponent>(InputComponent);
 	const FCombatSystem_GameplayTags& GameplayTags = FCombatSystem_GameplayTags::Get();
 
-	//Move action bindings
-	//CombatSystemInputComponent->BindAction()
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Triggered, this, &ACombatSystem_PlayerController::MoveInputTriggered);
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Canceled, this, &ACombatSystem_PlayerController::MoveInputFinished);
 	CombatSystemInputComponent->BindNativeAction(InputConfig, GameplayTags.InputTag_Move, ETriggerEvent::Completed, this, &ACombatSystem_PlayerController::MoveInputFinished);
@@ -37,9 +35,9 @@ void ACombatSystem_PlayerController::SetupInputComponent()
 
 void ACombatSystem_PlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
 {
-	if (GetCombatASC())
+	if (GetCSC())
 	{
-		GetCombatASC()->ProcessAbilityInput(DeltaTime, bGamePaused);
+		GetCSC()->ProcessAbilityInput(DeltaTime, bGamePaused);
 	}
 	Super::PostProcessInput(DeltaTime, bGamePaused);
 }
@@ -76,35 +74,30 @@ void ACombatSystem_PlayerController::LookInputTriggered(const FInputActionValue&
 
 void ACombatSystem_PlayerController::AbilityInputTagPressedWithValue(const FInputActionValue& InputActionValue, FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagPressedWithValue(InputActionValue, InputTag);
+	GetCSC()->AbilityInputTagPressedWithValue(InputActionValue, InputTag);
 }
 
 void ACombatSystem_PlayerController::AbilityInputTagReleasedWithValue(const FInputActionValue& InputActionValue, FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagReleasedWithValue(InputActionValue, InputTag);
+	GetCSC()->AbilityInputTagReleasedWithValue(InputActionValue, InputTag);
 }
 
 void ACombatSystem_PlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagPressed(InputTag);
+	GetCSC()->AbilityInputTagPressed(InputTag);
 }
 
 void ACombatSystem_PlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	GetCombatASC()->AbilityInputTagReleased(InputTag);
+	GetCSC()->AbilityInputTagReleased(InputTag);
 }
 
-UCombatSystem_AbilityComponent* ACombatSystem_PlayerController::GetCombatASC()
+UCombatSystemComponent* ACombatSystem_PlayerController::GetCSC()
 {
-	if (CachedCombatAbilitySystemComponent == nullptr && GetPawn<ACombatSystem_CharacterBase>())
+	if (CachedCombatSystemComponent == nullptr && GetPawn<ACombatSystem_CharacterBase>())
 	{
-		CachedCombatAbilitySystemComponent = GetPawn<ACombatSystem_CharacterBase>()->GetCombatAbilitySystemComponent();
+		CachedCombatSystemComponent = GetPawn<ACombatSystem_CharacterBase>()->GetCombatSystemComponent();
 	}
-	return CachedCombatAbilitySystemComponent;
+	return CachedCombatSystemComponent;
 }
 
-// void ACombatSystem_PlayerController::AttackPressInputTriggered(const FInputActionValue& InputActionValue)
-// {
-// 	AttackInput = true;
-// }
-//

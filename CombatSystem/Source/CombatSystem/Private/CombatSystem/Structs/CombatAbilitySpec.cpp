@@ -35,7 +35,7 @@ FCombatAbilitySpec::FCombatAbilitySpec(UCombatAbility* InAbility, UObject* InSou
 }
 
 
-void FCombatAbilitySpecContainer::RegisterWithOwner(UCombatSystem_AbilityComponent* InOwner)
+void FCombatAbilitySpecContainer::RegisterWithOwner(UCombatSystemComponent* InOwner)
 {
 	Owner = InOwner;
 }

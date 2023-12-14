@@ -19,7 +19,7 @@ class COMBATSYSTEM_API ACombatSystem_CharacterBase : public ACharacter, public I
 
 public:
 	ACombatSystem_CharacterBase();
-	virtual UCombatSystem_AbilityComponent* GetCombatAbilitySystemComponent() const override;
+	virtual UCombatSystemComponent* GetCombatSystemComponent() const override;
 	virtual void PossessedBy(AController* NewController) override;
 
 
@@ -28,5 +28,5 @@ private:
 	UPROPERTY(EditAnywhere, Category = "CharacterBase|CombatSystem")
 	TObjectPtr<UCombatSystem_CharacterStartupInfo> StartupInfo;
 	UPROPERTY(VisibleAnywhere, Category = "CharacterBase|CombatSystem")
-	TObjectPtr<UCombatSystem_AbilityComponent> CombatSystemComponent;
+	TObjectPtr<UCombatSystemComponent> CombatSystemComponent;
 };

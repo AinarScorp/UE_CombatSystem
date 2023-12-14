@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTask.h"
-#include "Components/Actor/CombatSystem_AbilityComponent.h"
+#include "Components/Actor/CombatSystemComponent.h"
 #include "CombatSystem_WaitGameplayEvent.generated.h"
 
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 /**
  * 
  */
@@ -20,7 +20,7 @@ class COMBATSYSTEM_API UCombatSystem_WaitGameplayEvent : public UGameplayTask
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability", meta = (DefaultToSelf = "TargetActor"))
-	static UCombatSystem_WaitGameplayEvent* WaitGameplayEvent(AActor* TargetActor, FGameplayTag EventTag, bool OnlyTriggerOnce = false, bool OnlyMatchExact = true);
+	static UCombatSystem_WaitGameplayEvent* WaitGameplayEvent(UCombatAbility* OwningAbility, FGameplayTag EventTag, bool OnlyTriggerOnce = false, bool OnlyMatchExact = true);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventReceivedDelegate, FCombatEventData, Payload);
 
 	UPROPERTY(BlueprintAssignable)
@@ -39,6 +39,6 @@ protected:
 
 	FDelegateHandle MyHandle;
 private:
-	TWeakObjectPtr<UCombatSystem_AbilityComponent> CombatSystemComponent;
+	TWeakObjectPtr<UCombatSystemComponent> CombatSystemComponent;
 
 };

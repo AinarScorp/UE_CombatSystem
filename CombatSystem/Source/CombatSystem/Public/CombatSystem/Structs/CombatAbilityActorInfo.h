@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "CombatAbilityActorInfo.generated.h"
 
-class UCombatSystem_AbilityComponent;
+class UCombatSystemComponent;
 
 USTRUCT(BlueprintType)
 struct FCombatAbilityActorInfo
@@ -22,11 +22,15 @@ struct FCombatAbilityActorInfo
 	UPROPERTY(BlueprintReadOnly, Category = "ActorInfo")
 	TWeakObjectPtr<UAnimInstance> AnimInstance;
 	UPROPERTY(BlueprintReadOnly, Category = "ActorInfo")
-	TWeakObjectPtr<UCombatSystem_AbilityComponent>	CombatAbilitySystemComponent;
+	TWeakObjectPtr<UCombatSystemComponent>	CombatSystemComponent;
 	//TODO: Maybe add Player controller and AI controller to avoid casting?
 	UPROPERTY(BlueprintReadOnly, Category = "ActorInfo")
 	TWeakObjectPtr<AController>	Controller;
 
 	/** Initializes the info from an owning actor. Will set both owner and avatar */
-	virtual void InitFromActor(AActor *OwnerActor, AActor *AvatarActor, UCombatSystem_AbilityComponent* InAbilitySystemComponent);
+	virtual void InitFromActor(AActor *OwnerActor, AActor *AvatarActor, UCombatSystemComponent* InAbilitySystemComponent);
+	void Test(USkeletalMeshComponent* InSkeletalMeshComponent)
+	{
+		SkeletalMeshComponent = InSkeletalMeshComponent;
+	};
 };

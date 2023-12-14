@@ -17,7 +17,7 @@ void USurroundAttack::ActivateAbility(const FCombatAbilitySpecHandle Handle, con
 		MontageTask->OnCompleted.AddDynamic(this, &USurroundAttack::InternalEndAbility);
 		MontageTask->ReadyForActivation();
 	}
-	UCombatSystem_WaitGameplayEvent* WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(CurrentActorInfo->AvatarActor.Get(),FCombatSystem_GameplayTags::Get().Actions_Attack_Magic,true);
+	UCombatSystem_WaitGameplayEvent* WaitForInputWindowStartTask = UCombatSystem_WaitGameplayEvent::WaitGameplayEvent(this,FCombatSystem_GameplayTags::Get().Actions_Attack_Magic,true);
 	WaitForInputWindowStartTask->EventReceived.AddDynamic(this, &USurroundAttack::SummonProjectiles);
 	WaitForInputWindowStartTask->ReadyForActivation();
 }
