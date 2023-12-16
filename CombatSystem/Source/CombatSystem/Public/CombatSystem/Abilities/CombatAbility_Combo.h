@@ -31,29 +31,44 @@ class COMBATSYSTEM_API UCombatAbility_Combo : public UCombatAbility
 	GENERATED_BODY()
 public:
 	virtual void ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData = nullptr) override;
-	virtual void InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo) override;
+	virtual void EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled) override;
 protected:
-	virtual void StartNextAttack();
-	// UFUNCTION()
-	// virtual void MontageStoppedPlaying();
+
 	UFUNCTION()
 	virtual void AttackInputWindowStarted(FCombatEventData Payload);
 	UFUNCTION()
 	virtual void AttackInputWindowEnded(FCombatEventData Payload);
 private:
 	void RotateToMoveInput() const;
-	void StartNewWaitTaskForInputWindowStart();
-	void StartNewWaitTaskForInputWindowEnd();
+	void PlayAttackAnimation(const FMontageWithSection& AttackMontage);
+
+	void TryPerformAttack();
+	void PerformAttack(const FMontageWithSection& AttackMontage);
+	void ActivateWaitTasks(bool WaitToStartListeningForInput);
+	UFUNCTION()
+	virtual void ReceivedInput(FCombatEventData Payload);
+	UFUNCTION()
+	virtual void ReceivedAnimation(FCombatEventData Payload);
+	UFUNCTION()
+	virtual void StartListeningToInput(FCombatEventData Payload);
+	UFUNCTION()
+	virtual void StopListeningToInput(FCombatEventData Payload);
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ActivatedByInputTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FMontageWithSection FirstAttack;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FComboAnimInfo> Combos;
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
 	bool bShouldRotateToInput = true;
 private:
-	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForInputWindowStartTask;
-	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForInputWindowEndTask;
+	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForAnimationReadyTask;
+	TWeakObjectPtr<UCombatSystem_WaitGameplayEvent> WaitForInputTask;
+
 	TWeakObjectPtr<UCombatSystem_PlayMontage> MontageTask;
-	int CurrentComboIndex = 0;
+	FMontageWithSection* NextAttackAnimation =nullptr;
+
 	bool ListeningToInput;
-	
+	bool bReceivedInput;
 };

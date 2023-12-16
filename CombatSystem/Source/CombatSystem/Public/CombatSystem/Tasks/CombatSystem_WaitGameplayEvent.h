@@ -20,7 +20,7 @@ class COMBATSYSTEM_API UCombatSystem_WaitGameplayEvent : public UGameplayTask
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "CombatSystem|Ability", meta = (DefaultToSelf = "TargetActor"))
-	static UCombatSystem_WaitGameplayEvent* WaitGameplayEvent(UCombatAbility* OwningAbility, FGameplayTag EventTag, bool OnlyTriggerOnce = false, bool OnlyMatchExact = true);
+	static UCombatSystem_WaitGameplayEvent* WaitGameplayEvent(UCombatAbility* OwningAbility, FGameplayTag EventTag, bool OnlyTriggerOnce = true, bool OnlyMatchExact = true);
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEventReceivedDelegate, FCombatEventData, Payload);
 
 	UPROPERTY(BlueprintAssignable)

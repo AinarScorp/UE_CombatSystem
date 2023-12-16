@@ -18,13 +18,15 @@ struct FCombatEventData
 	/** Tag of the event that triggered this */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTag EventTag;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTag AdditionalInfoTag;
 
 	/** The instigator of the event */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Instanced)
 	TObjectPtr<const AActor> Instigator;
 
 	/** The target of the event */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Instanced)
 	TObjectPtr<const AActor> Target;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

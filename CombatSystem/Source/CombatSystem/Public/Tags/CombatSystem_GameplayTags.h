@@ -22,16 +22,19 @@ protected:
 public:
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look;
+	FGameplayTag InputTag_Attack;
 	FGameplayTag InputTag_Attack_Primary;
 	FGameplayTag InputTag_Attack_Secondary;
 	FGameplayTag InputTag_Dodge;
 	FGameplayTag InputTag_RightClick;
+	FGameplayTag Actions_Attack_Combo;
 	FGameplayTag Actions_Attack_Primary;
 	FGameplayTag Actions_Attack_Secondary;
 	FGameplayTag Actions_Attack_Sneak;
 	FGameplayTag Actions_Attack_Magic;
 	FGameplayTag Actions_Dodge;
-	
+
+	FGameplayTag Animation_NextAttackReady;
 	FGameplayTag AttackInputWindow_Start;
 	FGameplayTag AttackInputWindow_End;
 	FGameplayTag Weapon;
