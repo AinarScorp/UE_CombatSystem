@@ -59,6 +59,8 @@ void UCombatAbility_SneakAttack::ActivateAbility(const FCombatAbilitySpecHandle 
 	Super::ActivateAbility(Handle, ActorInfo, TriggerEventData);
 	UCombatSystem_PlayMontage* MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, "AttackCombo", StealthKillMontage, 1);
 	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_SneakAttack::InternalEndAbility);
+	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_SneakAttack::InternalEndAbility);
+	
 	MontageTask->ReadyForActivation();
 	UCombatSystem_AbilityLibrary::SendGameplayEventToActor(Target,FCombatSystem_GameplayTags::Get().Hit_Sneak);
 }

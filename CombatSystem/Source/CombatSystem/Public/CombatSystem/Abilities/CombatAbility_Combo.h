@@ -4,18 +4,22 @@
 
 #include "CoreMinimal.h"
 #include "CombatAbility.h"
+#include "Helpers/HelperStructs.h"
 #include "CombatAbility_Combo.generated.h"
 
 class UCombatSystem_PlayMontage;
 //TODO: Combine with Hit animations
 USTRUCT(BlueprintType)
-struct FComboAnimInfo
+struct FComboAnimInfo : public FMontageWithSection
 {
 	GENERATED_BODY()
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AnimMontage;
-	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
-	FName AnimSection;
+	//This tag is going to be expected to be triggered for this animation to play
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag TriggerTag;
+	// UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	// TObjectPtr<UAnimMontage> AnimMontage;
+	// UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	// FName AnimSection;
 };
 class UCombatSystem_WaitGameplayEvent;
 /**
@@ -28,7 +32,6 @@ class COMBATSYSTEM_API UCombatAbility_Combo : public UCombatAbility
 public:
 	virtual void ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData = nullptr) override;
 	virtual void InputPressed(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo) override;
-	virtual void EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled) override;
 protected:
 	virtual void StartNextAttack();
 	// UFUNCTION()

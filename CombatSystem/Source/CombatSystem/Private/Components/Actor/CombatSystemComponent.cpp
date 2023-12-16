@@ -203,11 +203,6 @@ UAnimMontage* UCombatSystemComponent::GetCurrentMontage() const
 	return nullptr;
 }
 
-void UCombatSystemComponent::OnGameplayTaskActivated(UGameplayTask& Task)
-{
-	Super::OnGameplayTaskActivated(Task);
-
-}
 
 
 void UCombatSystemComponent::RegisterTriggerableAbilities(const FCombatAbilitySpec& AbilitySpec)
@@ -314,8 +309,7 @@ FCombatAbilitySpec* UCombatSystemComponent::FindAbilitySpecFromClass(const TSubc
 	return nullptr;
 }
 
-void UCombatSystemComponent::GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities,
-                                                                                 bool bOnlyAbilitiesThatSatisfyTagRequirements) const
+void UCombatSystemComponent::GetActivatableAbilitySpecsByAllMatchingTags(const FGameplayTagContainer& GameplayTagContainer, TArray<FCombatAbilitySpec*>& MatchingGameplayAbilities,bool bOnlyAbilitiesThatSatisfyTagRequirements) const
 {
 	if (!GameplayTagContainer.IsValid())
 	{

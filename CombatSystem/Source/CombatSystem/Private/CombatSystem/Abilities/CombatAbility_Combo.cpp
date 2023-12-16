@@ -5,7 +5,6 @@
 
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "CombatSystem/Tasks/CombatSystem_WaitGameplayEvent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Library/EinarGameplayLibrary.h"
 #include "Player/Controller/CombatSystem_PlayerController.h"
 #include "Tags/CombatSystem_GameplayTags.h"
@@ -26,24 +25,6 @@ void UCombatAbility_Combo::InputPressed(const FCombatAbilitySpecHandle Handle, c
 	Super::InputPressed(Handle, ActorInfo);
 	StartNewWaitTaskForInputWindowEnd();
 
-}
-
-void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
-{
-
-	// if (WaitForInputWindowStartTask.IsValid())
-	// {
-	// 	WaitForInputWindowStartTask->ExternalCancel();
-	// }
-	// if (WaitForInputWindowEndTask.IsValid())
-	// {
-	// 	WaitForInputWindowEndTask->ExternalCancel();
-	// }
-	// if (MontageTask.IsValid())
-	// {
-	// 	MontageTask->ExternalCancel();
-	// }
-	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
 }
 
 void UCombatAbility_Combo::StartNextAttack()
