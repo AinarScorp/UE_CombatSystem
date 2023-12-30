@@ -10,14 +10,14 @@
 ACombatSystem_CharacterBase::ACombatSystem_CharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	//Attaching the component
 	CombatSystemComponent = CreateDefaultSubobject<UCombatSystemComponent>("CombatSystemComponent");
 }
 
-
+//ICombatSystem_AbilityInterface
 UCombatSystemComponent* ACombatSystem_CharacterBase::GetCombatSystemComponent() const
 {
 	return CombatSystemComponent;
-
 }
 
 void ACombatSystem_CharacterBase::PossessedBy(AController* NewController)
