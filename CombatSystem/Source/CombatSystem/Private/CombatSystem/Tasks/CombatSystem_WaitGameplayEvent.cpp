@@ -61,7 +61,6 @@ void UCombatSystem_WaitGameplayEvent::OnDestroy(bool bInOwnerFinished)
 
 void UCombatSystem_WaitGameplayEvent::GameplayEventCallback(const FCombatEventData* Payload)
 {
-	UE_LOG(LogTemp,Display, TEXT("%s GameplayEventCallback %s"),*GetName(), *Tag.GetTagName().ToString())
 
 	GameplayEventContainerCallback(Tag, Payload);
 

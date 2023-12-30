@@ -15,6 +15,7 @@ class COMBATSYSTEM_API UCombatAbility_ComboInput : public UCombatAbility
 	GENERATED_BODY()
 public:
 	virtual void ActivateAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, const FCombatEventData* TriggerEventData) override;
+	virtual void OnGiveAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo) override;
 private:
 	UFUNCTION()
 	void OnAnimationSendInput(FCombatEventData Payload);

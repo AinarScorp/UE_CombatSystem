@@ -5,6 +5,7 @@
 
 #include "CombatSystem/Tasks/CombatSystem_PlayMontage.h"
 #include "CombatSystem/Tasks/CombatSystem_WaitGameplayEvent.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Library/EinarGameplayLibrary.h"
 #include "Player/Controller/CombatSystem_PlayerController.h"
 #include "Tags/CombatSystem_GameplayTags.h"
@@ -22,9 +23,9 @@ void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle
 	 }
 	 
 	Super::ActivateAbility(Handle, ActorInfo,TriggerEventData);
-
 	ActivateWaitTasks(ShouldPerfromAttackImmidiately);
 	
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s Activated and ShouldperfowmAttackIs : %s"),*DebugName,*UKismetStringLibrary::Conv_BoolToString(ShouldPerfromAttackImmidiately)));
 	if (!ShouldPerfromAttackImmidiately) return;
 	PerformAttack(FirstAttack);
 	
@@ -33,8 +34,11 @@ void UCombatAbility_Combo::ActivateAbility(const FCombatAbilitySpecHandle Handle
 void UCombatAbility_Combo::EndAbility(const FCombatAbilitySpecHandle Handle, const FCombatAbilityActorInfo* ActorInfo, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, bWasCancelled);
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s EndedAbility"),*DebugName));
+
 	bReceivedInput = false;
 	NextAttackAnimation = nullptr;
+	MontageTask == nullptr;
 }
 
 
@@ -93,6 +97,8 @@ void UCombatAbility_Combo::ReceivedAnimation(FCombatEventData Payload)
 	}
 	if (!NextAttackAnimation)
 	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s InternalEndAbility Due to Not Finding Anim IGNORE NEXT MESSAGE"),*DebugName));
+
 		InternalEndAbility();
 		return;
 	}
@@ -123,6 +129,10 @@ void UCombatAbility_Combo::StopListeningToInput(FCombatEventData Payload)
 	{
 		WaitForInputTask->ExternalCancel();
 	}
+	if (!MontageTask.IsValid())
+	{
+		InternalCancelAbility();
+	}
 }
 
 
@@ -134,6 +144,12 @@ void UCombatAbility_Combo::AttackInputWindowStarted(FCombatEventData Payload)
 void UCombatAbility_Combo::AttackInputWindowEnded(FCombatEventData Payload)
 {
 	//StartNextAttack();
+}
+
+void UCombatAbility_Combo::InternalEndAbility()
+{
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s InternalEndAbility Due to AnimCompletion"),*DebugName));
+	Super::InternalEndAbility();
 }
 
 void UCombatAbility_Combo::RotateToMoveInput() const
@@ -151,6 +167,8 @@ void UCombatAbility_Combo::PlayAttackAnimation(const FMontageWithSection& Attack
 	{
 		MontageTask->OnInterrupted.RemoveDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);
 	}
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s StartedAnimation"),*DebugName));
+
 	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), AttackMontage.AnimMontage, 1, AttackMontage.AnimSection,false);
 	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
 	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);

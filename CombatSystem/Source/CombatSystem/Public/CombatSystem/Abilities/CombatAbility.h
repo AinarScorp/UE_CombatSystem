@@ -147,6 +147,11 @@ protected:
 	FCombatEventData CombatEventData;
 private:
 	bool bCanActivateAbilityImplementedInBP;
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	FColor DebugColor = FColor::Yellow;
+	UPROPERTY(EditDefaultsOnly)
+	FString DebugName = "Combo #";
 };
 
 

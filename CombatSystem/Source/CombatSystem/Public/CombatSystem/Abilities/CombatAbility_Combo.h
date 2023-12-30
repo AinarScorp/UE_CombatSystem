@@ -38,6 +38,7 @@ protected:
 	virtual void AttackInputWindowStarted(FCombatEventData Payload);
 	UFUNCTION()
 	virtual void AttackInputWindowEnded(FCombatEventData Payload);
+	virtual void InternalEndAbility() override;
 private:
 	void RotateToMoveInput() const;
 	void PlayAttackAnimation(const FMontageWithSection& AttackMontage);
@@ -71,4 +72,6 @@ private:
 
 	bool ListeningToInput;
 	bool bReceivedInput;
+
+
 };
