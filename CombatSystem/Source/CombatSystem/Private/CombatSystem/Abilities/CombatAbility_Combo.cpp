@@ -121,6 +121,11 @@ void UCombatAbility_Combo::StopListeningToInput(FCombatEventData Payload)
 	// 		return;
 	// 	}
 	// }
+
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s InternalEndAbility Due to InputWindow_End"),*DebugName));
+
+	InternalEndAbility();
+	return;
 	if (WaitForAnimationReadyTask.IsValid())
 	{
 		WaitForAnimationReadyTask->ExternalCancel();
@@ -170,7 +175,7 @@ void UCombatAbility_Combo::PlayAttackAnimation(const FMontageWithSection& Attack
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE,5,DebugColor,FString::Printf(TEXT("%s StartedAnimation"),*DebugName));
 
 	MontageTask = UCombatSystem_PlayMontage::CreatePlayMontageProxy(this, GetFName(), AttackMontage.AnimMontage, 1, AttackMontage.AnimSection,false);
-	MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
+	//MontageTask->OnCompleted.AddDynamic(this, &UCombatAbility_Combo::InternalEndAbility);
 	MontageTask->OnInterrupted.AddDynamic(this, &UCombatAbility_Combo::InternalCancelAbility);
 	MontageTask->ReadyForActivation();
 	

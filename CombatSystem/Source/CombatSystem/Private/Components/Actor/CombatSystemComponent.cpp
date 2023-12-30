@@ -511,7 +511,6 @@ void UCombatSystemComponent::AbilitySpecInputReleased(FCombatAbilitySpec& Spec) 
 	}
 }
 
-//TODO: Decide what to do with the commented out code
 int32 UCombatSystemComponent::HandleGameplayEvent(FGameplayTag EventTag, const FCombatEventData* Payload)
 {
 	int32 TriggeredCount = 0;
@@ -538,17 +537,6 @@ int32 UCombatSystemComponent::HandleGameplayEvent(FGameplayTag EventTag, const F
 	{
 		Delegate->Broadcast(Payload);
 	}
-
-	// // Make a copy in case it changes due to callbacks
-	// TArray<TPair<FGameplayTagContainer, FGameplayEventTagMulticastDelegate>> LocalGameplayEventTagContainerDelegates = GameplayEventTagContainerDelegates;
-	// for (TPair<FGameplayTagContainer, FGameplayEventTagMulticastDelegate>& SearchPair : LocalGameplayEventTagContainerDelegates)
-	// {
-	// 	if (SearchPair.Key.IsEmpty() || EventTag.MatchesAny(SearchPair.Key))
-	// 	{
-	// 		SearchPair.Value.Broadcast(EventTag, Payload);
-	// 	}
-	// }
-
 	return TriggeredCount;
 }
 

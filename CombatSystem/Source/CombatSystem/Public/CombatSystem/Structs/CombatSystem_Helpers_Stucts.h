@@ -36,6 +36,3 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	FGameplayTagContainer ExplicitTags;
 };
-/**
- * 
- */
