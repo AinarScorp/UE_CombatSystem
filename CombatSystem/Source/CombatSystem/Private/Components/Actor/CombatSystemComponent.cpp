@@ -87,7 +87,6 @@ void UCombatSystemComponent::ProcessAbilityInput(float DeltaTime, bool bGamePaus
 		{
 			if (AbilitySpec->Ability && !AbilitySpec->IsActive())
 			{
-				// if (LyraAbilityCDO->GetActivationPolicy() == ELyraAbilityActivationPolicy::WhileInputActive)
 				AbilitiesToActivate.AddUnique(AbilitySpec->Handle);
 			}
 		}
